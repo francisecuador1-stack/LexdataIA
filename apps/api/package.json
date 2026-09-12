@@ -16,6 +16,7 @@
     "@nestjs/platform-express": "^10.4.0",
     "@prisma/client": "^6.9.0",
     "reflect-metadata": "^0.2.2",
+    "jsonwebtoken": "^9.0.0",
     "rxjs": "^7.8.0",
     "zod": "^3.24.0",
     "@lexdata/contracts": "workspace:*"
@@ -26,6 +27,7 @@
     "prisma": "^6.9.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
+    "@types/jsonwebtoken": "^9.0.0",
     "@types/node": "^22.0.0",
     "@types/express": "^5.0.0"
   },

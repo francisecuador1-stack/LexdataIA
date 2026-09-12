@@ -46,7 +46,26 @@ const reminderWorker = new Worker(
   { connection },
 );
 
-console.log('LEXDATA Worker started — queues: corpus-ingestion, pdf-generation, alert-72h, reminders');
+// ── Queue: verify-chain (daily integrity check, §4 of architecture) ──
+const verifyChainWorker = new Worker(
+  'verify-chain',
+  async (job) => {
+    console.log(`[verify-chain] Processing: ${job.name}`, job.data);
+    // TODO: For each tenant, verify hash chains on:
+    //   - evidencias (INV-3): prev_hash chain continuity
+    //   - audit_logs (INV-4): prev_hash chain continuity
+    // If any break is detected, create an incidente of type INTEGRIDAD
+    // and alert the DPO. This job is what allows the UI to claim
+    // "registro inmutable" without lying.
+    const table = job.data?.table as string | undefined;
+    const tenantId = job.data?.tenantId as string | undefined;
+    console.log(`[verify-chain] Verifying ${table ?? 'all tables'} for tenant ${tenantId ?? 'all'}`);
+    // TODO: Implement chain verification using hash-chain.verifyChain()
+  },
+  { connection },
+);
+
+console.log('LEXDATA Worker started — queues: corpus-ingestion, pdf-generation, alert-72h, reminders, verify-chain');
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
@@ -55,6 +74,7 @@ process.on('SIGTERM', async () => {
     pdfWorker.close(),
     alertWorker.close(),
     reminderWorker.close(),
+    verifyChainWorker.close(),
   ]);
   await connection.quit();
   process.exit(0);
