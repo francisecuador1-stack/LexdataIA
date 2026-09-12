@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useActiveClient } from '@/stores/useActiveClient';
 
 const NAV_SECTIONS = [
   {
@@ -55,20 +56,14 @@ const NAV_SECTIONS = [
   },
 ];
 
-const SEED_COMPANIES = [
-  'TechCorp Ecuador S.A.',
-  'Salud Digital Quito Cía. Ltda.',
-  'Banco del Pacífico',
-  'EduOnline S.A.',
-  'LogiFreight Ecuador',
-];
-
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { clientes, clienteId, setClienteId } = useActiveClient();
+
   return (
     <aside
       className={cn(
@@ -97,9 +92,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
             Empresa activa
           </label>
-          <select className="w-full rounded bg-navy-950 px-2 py-1.5 text-xs text-white outline-none">
-            {SEED_COMPANIES.map((c) => (
-              <option key={c}>{c}</option>
+          <select
+            value={clienteId ?? ''}
+            onChange={(e) => setClienteId(e.target.value)}
+            className="w-full rounded bg-navy-950 px-2 py-1.5 text-xs text-white outline-none"
+          >
+            {clientes.map((c) => (
+              <option key={c.id} value={c.id}>{c.razonSocial}</option>
             ))}
           </select>
         </div>
