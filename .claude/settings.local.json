@@ -12,7 +12,8 @@
       "Bash(pnpm --filter @lexdata/contracts build)",
       "Bash(pnpm --filter @lexdata/web typecheck)",
       "Bash(pnpm --filter @lexdata/api typecheck)",
-      "Bash(pnpm --filter @lexdata/worker typecheck)"
+      "Bash(pnpm --filter @lexdata/worker typecheck)",
+      "Bash(pnpm --filter @lexdata/web dev)"
     ]
   },
   "enableAllProjectMcpServers": true,
