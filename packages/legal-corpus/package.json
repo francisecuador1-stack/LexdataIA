@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "yaml": "^2.7.0",
-    "glob": "^11.0.0"
+    "glob": "^11.0.0",
+    "@prisma/client": "^6.0.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
