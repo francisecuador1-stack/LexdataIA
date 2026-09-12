@@ -22,7 +22,10 @@
       "Bash(pnpm --filter @lexdata/api test)",
       "Bash(pnpm --filter @lexdata/web add -D @vitest/browser jsdom)",
       "Bash(pnpm --filter @lexdata/legal-corpus test)",
-      "Bash(pnpm --filter @lexdata/legal-corpus hash)"
+      "Bash(pnpm --filter @lexdata/legal-corpus hash)",
+      "Bash(pnpm --filter @lexdata/api exec prisma generate)",
+      "Bash(node -e ':*)",
+      "Bash(sort -t: -k1,1)"
     ]
   },
   "enableAllProjectMcpServers": true,

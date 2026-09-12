@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
 import { Fase5Service } from './fase5.service';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('fase-5')
 export class Fase5Controller {
@@ -8,31 +9,32 @@ export class Fase5Controller {
   // ── Controles ──
 
   @Get('controles')
-  listControles() {
-    return this.service.listControles();
+  listControles(@Req() req: any) {
+    return this.service.listControles(req.user.tenantId);
   }
 
   @Post('controles/:id/evaluar-eficacia')
-  evaluarEficacia(@Param('id') id: string, @Body() body: any) {
-    return this.service.evaluarEficacia(id, body);
+  @Roles('DPO_HUMANO')
+  evaluarEficacia(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    return this.service.evaluarEficacia(req.user.tenantId, id, body, req.user.sub);
   }
 
   // ── Hallazgos ──
 
   @Get('hallazgos')
-  listHallazgos() {
-    return this.service.listHallazgos();
+  listHallazgos(@Req() req: any) {
+    return this.service.listHallazgos(req.user.tenantId);
   }
 
   @Post('hallazgos')
-  createHallazgo(@Body() body: any) {
-    return this.service.createHallazgo(body);
+  createHallazgo(@Req() req: any, @Body() body: any) {
+    return this.service.createHallazgo(req.user.tenantId, body);
   }
 
-  // ── Recomendaciones ──
+  // ── Contadores badge ──
 
-  @Get('recomendaciones')
-  listRecomendaciones() {
-    return this.service.listRecomendaciones();
+  @Get('badges')
+  contadoresBadge(@Req() req: any) {
+    return this.service.contadoresBadge(req.user.tenantId);
   }
 }

@@ -1,52 +1,63 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
 import { Fase7Service } from './fase7.service';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('fase-7')
 export class Fase7Controller {
   constructor(private readonly service: Fase7Service) {}
 
-  // ── Seguimiento ──
-
-  @Get('seguimiento')
-  getSeguimiento() {
-    return this.service.getSeguimiento();
-  }
-
   // ── Recomendaciones ──
 
   @Get('recomendaciones')
-  listRecomendaciones() {
-    return this.service.listRecomendaciones();
+  listRecomendaciones(@Req() req: any) {
+    return this.service.listRecomendaciones(req.user.tenantId);
   }
 
   @Post('recomendaciones/:id/verificar')
-  verificarRecomendacion(@Param('id') id: string) {
-    return this.service.verificarRecomendacion(id);
+  @Roles('DPO_HUMANO')
+  verificarEficacia(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.service.verificarEficacia(
+      req.user.tenantId,
+      id,
+      body.hashEvidencia,
+      req.user.sub,
+    );
   }
 
   // ── Madurez ──
 
   @Get('madurez')
-  getMadurez() {
-    return this.service.getMadurez();
+  madurez(@Req() req: any) {
+    return this.service.madurez(req.user.tenantId);
   }
 
   // ── Lecciones aprendidas ──
 
   @Get('lecciones')
-  listLecciones() {
-    return this.service.listLecciones();
+  listLecciones(@Req() req: any) {
+    return this.service.listLecciones(req.user.tenantId);
   }
 
   @Post('lecciones')
-  createLeccion(@Body() body: any) {
-    return this.service.createLeccion(body);
+  createLeccion(@Req() req: any, @Body() body: any) {
+    return this.service.createLeccion(req.user.tenantId, body);
   }
 
   // ── Oportunidades de mejora ──
 
   @Get('oportunidades')
-  listOportunidades() {
-    return this.service.listOportunidades();
+  oportunidades(@Req() req: any) {
+    return this.service.oportunidades(req.user.tenantId);
+  }
+
+  // ── Expediente de trazabilidad ──
+
+  @Get('expediente/:recomendacionId')
+  expediente(@Req() req: any, @Param('recomendacionId') recomendacionId: string) {
+    return this.service.expediente(req.user.tenantId, recomendacionId);
   }
 }

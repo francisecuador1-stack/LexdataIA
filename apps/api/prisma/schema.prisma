@@ -14,48 +14,244 @@ datasource db {
 // 1. ENUMS
 // ════════════════════════════════════════════════════════════
 
-enum FasePHVA          { PLANIFICAR HACER VERIFICAR ACTUAR }
-enum TipoNorma         { NACIONAL INTERNACIONAL }
-enum FuenteNorma       { CRE LOPDP RGLOPDP SPDP SGPDP ISO_27001 ISO_27701 ISO_42001 NIST }
-enum EstadoNorma       { VIGENTE DEROGADA PROYECTO }
-enum EstadoPrincipio   { VERIFICADO PENDIENTE NO_VERIFICADO }
+enum FasePHVA {
+  PLANIFICAR
+  HACER
+  VERIFICAR
+  ACTUAR
+}
 
-enum EstadoTratamiento   { PENDIENTE VALIDADO CON_OBSERVACIONES }
-enum NivelRiesgo         { BAJO MEDIO ALTO CRITICO }
-enum EstadoRiesgo        { IDENTIFICADO EN_TRATAMIENTO MITIGADO ACEPTADO }
-enum NivelCategoriaDatos { ESTANDAR REFORZADO MAXIMO MAXIMO_REPRESENTANTE }
-enum CriticidadActivo    { BAJA MEDIA ALTA }
+enum TipoNorma {
+  NACIONAL
+  INTERNACIONAL
+}
 
-enum TipoControl       { TECNICO ORGANIZATIVO LEGAL DOCUMENTAL }
-enum EstadoControl     { PROPUESTA APROBADA EN_IMPLEMENTACION IMPLEMENTADO EN_PROGRESO PENDIENTE }
-enum Eficacia          { ALTA MEDIA BAJA NO_EVALUADA }
-enum Confianza         { ALTA MEDIA BAJA NO_EVALUADA }
-enum Suficiencia       { SUFICIENTE PROPORCIONAL INSUFICIENTE NO_EVALUADA }
+enum FuenteNorma {
+  CRE
+  LOPDP
+  RGLOPDP
+  SPDP
+  SGPDP
+  ISO_27001
+  ISO_27701
+  ISO_42001
+  NIST
+}
 
-enum TipoHallazgo      { NC_MAYOR NC_MENOR OBSERVACION OPORTUNIDAD BUENA_PRACTICA HALLAZGO_DISENO }
-enum SeveridadHallazgo { CRITICA MAYOR MENOR }
-enum EstadoHallazgo    { ABIERTO EN_PROCESO PENDIENTE_EVIDENCIA CERRADO NO_RESUELTO }
+enum EstadoNorma {
+  VIGENTE
+  DEROGADA
+  PROYECTO
+}
 
-enum EstadoAuditoria   { PROGRAMADA EN_EJECUCION CERRADA }
-enum TipoAuditoria     { INTERNA EXTERNA }
-enum RespuestaChecklist { CUMPLE NO_CUMPLE PARCIAL NO_APLICA }
-enum PerfilChecklist   { LOPDP ISO_27701 VIDEOVIGILANCIA SALUD_SENSIBLES INTELIGENCIA_ARTIFICIAL }
+enum EstadoPrincipio {
+  VERIFICADO
+  PENDIENTE
+  NO_VERIFICADO
+}
 
-enum TipoIncidente     { CONFIDENCIALIDAD INTEGRIDAD DISPONIBILIDAD }
-enum EstadoIncidente   { DETECTADO EN_CONTENCION NOTIFICADO_SPDP CERRADO }
+enum EstadoTratamiento {
+  PENDIENTE
+  VALIDADO
+  CON_OBSERVACIONES
+}
 
-enum EstadoRecomendacion { EMITIDA PENDIENTE EN_PROCESO EN_IMPLEMENTACION IMPLEMENTADA VERIFICADO CERRADA }
-enum EstadoPlanAccion    { COMPROMETIDO EN_EJECUCION COMPLETADO VENCIDO }
-enum NivelMadurez        { INICIAL GESTIONADO DEFINIDO CONTROLADO OPTIMIZADO }
+enum NivelRiesgo {
+  BAJO
+  MEDIO
+  ALTO
+  CRITICO
+}
 
-enum RespuestaDiagnostico { CUMPLE PARCIAL NO_CUMPLE }
-enum RespuestaPIMS        { IMPLEMENTADO EN_PROCESO NO_IMPLEMENTADO }
-enum EstadoRol            { DEFINIDO PARCIALMENTE_DEFINIDO NO_DEFINIDO }
-enum EstadoRecurso        { SUFICIENTE INSUFICIENTE NO_EVALUADO }
+enum EstadoRiesgo {
+  IDENTIFICADO
+  EN_TRATAMIENTO
+  MITIGADO
+  ACEPTADO
+}
 
-enum Rol       { SUPERADMIN LEGAL_ADMIN DPO_HUMANO DPO_ANALISTA CLIENTE_ADMIN CLIENTE_COLABORADOR AUDITOR_EXTERNO MARK_AI }
-enum ActorType { HUMANO MARK_AI SISTEMA }
-enum CasoCotizacion { A B }
+enum NivelCategoriaDatos {
+  ESTANDAR
+  REFORZADO
+  MAXIMO
+  MAXIMO_REPRESENTANTE
+}
+
+enum CriticidadActivo {
+  BAJA
+  MEDIA
+  ALTA
+}
+
+enum TipoControl {
+  TECNICO
+  ORGANIZATIVO
+  LEGAL
+  DOCUMENTAL
+}
+
+enum EstadoControl {
+  PROPUESTA
+  APROBADA
+  EN_IMPLEMENTACION
+  IMPLEMENTADO
+  EN_PROGRESO
+  PENDIENTE
+}
+
+enum Eficacia {
+  ALTA
+  MEDIA
+  BAJA
+  NO_EVALUADA
+}
+
+enum Confianza {
+  ALTA
+  MEDIA
+  BAJA
+  NO_EVALUADA
+}
+
+enum Suficiencia {
+  SUFICIENTE
+  PROPORCIONAL
+  INSUFICIENTE
+  NO_EVALUADA
+}
+
+enum TipoHallazgo {
+  NC_MAYOR
+  NC_MENOR
+  OBSERVACION
+  OPORTUNIDAD
+  BUENA_PRACTICA
+  HALLAZGO_DISENO
+}
+
+enum SeveridadHallazgo {
+  CRITICA
+  MAYOR
+  MENOR
+}
+
+enum EstadoHallazgo {
+  ABIERTO
+  EN_PROCESO
+  PENDIENTE_EVIDENCIA
+  CERRADO
+  NO_RESUELTO
+}
+
+enum EstadoAuditoria {
+  PROGRAMADA
+  EN_EJECUCION
+  CERRADA
+}
+
+enum TipoAuditoria {
+  INTERNA
+  EXTERNA
+}
+
+enum RespuestaChecklist {
+  CUMPLE
+  NO_CUMPLE
+  PARCIAL
+  NO_APLICA
+}
+
+enum PerfilChecklist {
+  LOPDP
+  ISO_27701
+  VIDEOVIGILANCIA
+  SALUD_SENSIBLES
+  INTELIGENCIA_ARTIFICIAL
+}
+
+enum TipoIncidente {
+  CONFIDENCIALIDAD
+  INTEGRIDAD
+  DISPONIBILIDAD
+}
+
+enum EstadoIncidente {
+  DETECTADO
+  EN_CONTENCION
+  NOTIFICADO_SPDP
+  CERRADO
+}
+
+enum EstadoRecomendacion {
+  EMITIDA
+  PENDIENTE
+  EN_PROCESO
+  EN_IMPLEMENTACION
+  IMPLEMENTADA
+  VERIFICADO
+  CERRADA
+}
+
+enum EstadoPlanAccion {
+  COMPROMETIDO
+  EN_EJECUCION
+  COMPLETADO
+  VENCIDO
+}
+
+enum NivelMadurez {
+  INICIAL
+  GESTIONADO
+  DEFINIDO
+  CONTROLADO
+  OPTIMIZADO
+}
+
+enum RespuestaDiagnostico {
+  CUMPLE
+  PARCIAL
+  NO_CUMPLE
+}
+
+enum RespuestaPIMS {
+  IMPLEMENTADO
+  EN_PROCESO
+  NO_IMPLEMENTADO
+}
+
+enum EstadoRol {
+  DEFINIDO
+  PARCIALMENTE_DEFINIDO
+  NO_DEFINIDO
+}
+
+enum EstadoRecurso {
+  SUFICIENTE
+  INSUFICIENTE
+  NO_EVALUADO
+}
+
+enum Rol {
+  SUPERADMIN
+  LEGAL_ADMIN
+  DPO_HUMANO
+  DPO_ANALISTA
+  CLIENTE_ADMIN
+  CLIENTE_COLABORADOR
+  AUDITOR_EXTERNO
+  MARK_AI
+}
+
+enum ActorType {
+  HUMANO
+  MARK_AI
+  SISTEMA
+}
+
+enum CasoCotizacion {
+  A
+  B
+}
 
 // ════════════════════════════════════════════════════════════
 // 2. NÚCLEO: tenant, usuarios, empresa cliente

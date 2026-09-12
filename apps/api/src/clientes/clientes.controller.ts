@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Req } from '@nestjs/common';
 import { ClientesService } from './clientes.service';
 
 @Controller('clientes')
@@ -6,22 +6,20 @@ export class ClientesController {
   constructor(private readonly service: ClientesService) {}
 
   @Get()
-  list() {
-    return this.service.list();
-  }
+  list(@Req() req: any) { return this.service.list(req.user.tenantId); }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
-  }
+  getById(@Req() req: any, @Param('id') id: string) { return this.service.getById(req.user.tenantId, id); }
 
   @Post()
-  create(@Body() body: any) {
-    return this.service.create(body);
-  }
+  create(@Req() req: any, @Body() body: any) { return this.service.create(req.user.tenantId, body); }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.service.update(id, body);
-  }
+  update(@Req() req: any, @Param('id') id: string, @Body() body: any) { return this.service.update(req.user.tenantId, id, body); }
+
+  @Get(':id/resumen')
+  getResumen(@Req() req: any, @Param('id') id: string) { return this.service.getResumen(req.user.tenantId, id); }
+
+  @Get(':id/derivacion-documental')
+  getDerivacionDocumental(@Req() req: any, @Param('id') id: string) { return this.service.getDerivacionDocumental(req.user.tenantId, id); }
 }

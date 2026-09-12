@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, Query } from '@nestjs/common';
 import { Fase4Service } from './fase4.service';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('fase-4')
 export class Fase4Controller {
@@ -8,53 +9,71 @@ export class Fase4Controller {
   // ── Controles ──
 
   @Get('controles')
-  listControles() {
-    return this.service.listControles();
+  listControles(@Req() req: any) {
+    return this.service.listControles(req.user.tenantId);
   }
 
   @Post('controles')
-  createControl(@Body() body: any) {
-    return this.service.createControl(body);
+  createControl(@Req() req: any, @Body() body: any) {
+    return this.service.createControl(req.user.tenantId, body);
   }
 
   @Post('controles/:id/calificar')
-  calificarControl(@Param('id') id: string, @Body() body: any) {
-    return this.service.calificarControl(id, body);
+  @Roles('DPO_HUMANO')
+  calificarControl(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    return this.service.calificarControl(req.user.tenantId, id, {
+      suficiencia: body.suficiencia,
+      userId: req.user.sub,
+    });
   }
 
-  // ── Medidas y Validacion ──
+  // ── Medidas ──
 
   @Get('medidas')
-  listMedidas() {
-    return this.service.listMedidas();
+  listMedidas(@Req() req: any, @Query('tipo') tipo?: string) {
+    return this.service.listMedidas(req.user.tenantId, tipo);
   }
 
+  // ── Validacion de principios ──
+
   @Get('validacion-principios')
-  validacionPrincipios() {
-    return this.service.validacionPrincipios();
+  listValidacionPrincipios(@Req() req: any) {
+    return this.service.listValidacionPrincipios(req.user.tenantId);
+  }
+
+  @Post('validacion-principios')
+  @Roles('DPO_HUMANO')
+  validarPrincipio(@Req() req: any, @Body() body: any) {
+    return this.service.validarPrincipio(
+      req.user.tenantId,
+      body.tratamientoId,
+      body.veredicto,
+      body.motivo ?? null,
+      req.user.sub,
+    );
   }
 
   // ── Hallazgos ──
 
   @Get('hallazgos')
-  listHallazgos() {
-    return this.service.listHallazgos();
+  listHallazgos(@Req() req: any) {
+    return this.service.listHallazgos(req.user.tenantId);
   }
 
   @Post('hallazgos')
-  createHallazgo(@Body() body: any) {
-    return this.service.createHallazgo(body);
+  createHallazgo(@Req() req: any, @Body() body: any) {
+    return this.service.createHallazgo(req.user.tenantId, body);
   }
 
   // ── Planes de Accion ──
 
   @Get('planes-accion')
-  listPlanesAccion() {
-    return this.service.listPlanesAccion();
+  listPlanesAccion(@Req() req: any) {
+    return this.service.listPlanesAccion(req.user.tenantId);
   }
 
   @Post('planes-accion')
-  createPlanAccion(@Body() body: any) {
-    return this.service.createPlanAccion(body);
+  createPlanAccion(@Req() req: any, @Body() body: any) {
+    return this.service.createPlanAccion(req.user.tenantId, body);
   }
 }

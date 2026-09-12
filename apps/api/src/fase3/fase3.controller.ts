@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
 import { Fase3Service } from './fase3.service';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('fase-3')
 export class Fase3Controller {
@@ -8,58 +9,79 @@ export class Fase3Controller {
   // ── Diagnostico ──
 
   @Get('diagnostico')
-  getDiagnostico() {
-    return this.service.getDiagnostico();
+  listDiagnostico(@Req() req: any) {
+    return this.service.listDiagnostico(req.user.tenantId);
   }
 
   @Post('diagnostico/responder')
-  responderDiagnostico(@Body() body: any) {
-    return this.service.responderDiagnostico(body);
+  responderDiagnostico(@Req() req: any, @Body() body: any) {
+    return this.service.responderDiagnostico(
+      req.user.tenantId,
+      body.preguntaId,
+      body.respuesta,
+      req.user.sub,
+    );
   }
 
   @Post('diagnostico/preguntas')
-  agregarPreguntas(@Body() body: any) {
-    return this.service.agregarPreguntas(body);
+  @Roles('DPO_HUMANO')
+  addPregunta(@Req() req: any, @Body() body: any) {
+    return this.service.addPregunta(
+      req.user.tenantId,
+      body.dimensionId,
+      body.enunciado,
+      body.baseNormativa,
+    );
   }
 
   // ── Gobierno ──
 
   @Get('gobierno')
-  getGobierno() {
-    return this.service.getGobierno();
+  listGobierno(@Req() req: any) {
+    return this.service.listGobierno(req.user.tenantId);
   }
 
   @Get('roles')
-  getRoles() {
-    return this.service.getRoles();
+  listRoles(@Req() req: any) {
+    return this.service.listRoles(req.user.tenantId);
   }
 
   @Get('recursos')
-  getRecursos() {
-    return this.service.getRecursos();
+  listRecursos(@Req() req: any) {
+    return this.service.listRecursos(req.user.tenantId);
   }
 
   @Get('brechas')
-  getBrechas() {
-    return this.service.getBrechas();
+  listBrechas(@Req() req: any) {
+    return this.service.listBrechas(req.user.tenantId);
   }
 
   // ── Recomendaciones ──
 
   @Get('recomendaciones')
-  listRecomendaciones() {
-    return this.service.listRecomendaciones();
+  listRecomendaciones(@Req() req: any) {
+    return this.service.listRecomendaciones(req.user.tenantId);
   }
 
   @Post('recomendaciones/:id/verificar')
-  verificarRecomendacion(@Param('id') id: string) {
-    return this.service.verificarRecomendacion(id);
+  @Roles('DPO_HUMANO')
+  verificarEficacia(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.service.verificarEficacia(
+      req.user.tenantId,
+      id,
+      body.hashEvidencia,
+      req.user.sub,
+    );
   }
 
   // ── Informe ──
 
   @Get('informe')
-  getInforme() {
-    return this.service.getInforme();
+  informeEjecutivo(@Req() req: any) {
+    return this.service.informeEjecutivo(req.user.tenantId);
   }
 }

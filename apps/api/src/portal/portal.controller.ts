@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
 import { PortalService } from './portal.service';
 
 @Controller('portal')
@@ -8,13 +8,13 @@ export class PortalController {
   // ── PIMS ──
 
   @Get('pims')
-  listPims() {
-    return this.service.listPims();
+  listPims(@Req() req: any) {
+    return this.service.listPims(req.user.tenantId);
   }
 
   @Post('pims/responder')
-  responderPims(@Body() body: any) {
-    return this.service.responderPims(body);
+  responderPims(@Req() req: any, @Body() body: any) {
+    return this.service.responderPims(req.user.tenantId, body.preguntaId, body.respuesta);
   }
 
   // ── Registro (formulario SPDP + Pd-VaR) ──

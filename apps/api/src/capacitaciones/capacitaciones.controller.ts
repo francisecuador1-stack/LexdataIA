@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
 import { CapacitacionesService } from './capacitaciones.service';
 
 @Controller('capacitaciones')
@@ -20,13 +20,13 @@ export class CapacitacionesController {
   // ── Evaluaciones ──
 
   @Post('evaluaciones')
-  createEvaluacion(@Body() body: any) {
-    return this.service.createEvaluacion(body);
+  createEvaluacion(@Req() req: any, @Body() body: any) {
+    return this.service.evaluar(req.user.tenantId, body.cursoId, body.respuestas, body.personaNombre);
   }
 
   @Get('evaluaciones')
-  listEvaluaciones() {
-    return this.service.listEvaluaciones();
+  listEvaluaciones(@Req() req: any) {
+    return this.service.listEvaluaciones(req.user.tenantId);
   }
 
   // ── Certificados ──
@@ -39,14 +39,7 @@ export class CapacitacionesController {
   // ── Central (estadisticas) ──
 
   @Get('central')
-  getCentral() {
-    return this.service.getCentral();
-  }
-
-  // ── Informe ──
-
-  @Get('informe')
-  getInforme() {
-    return this.service.getInforme();
+  getCentral(@Req() req: any) {
+    return this.service.getCentral(req.user.tenantId);
   }
 }
