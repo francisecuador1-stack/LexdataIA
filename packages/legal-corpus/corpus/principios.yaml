@@ -1,0 +1,146 @@
+# corpus/principios.yaml
+# 13 Principios Rectores — Art. 10 LOPDP + RGLOPDP
+# Obligatorios para todo tratamiento de datos personales
+
+- nombre: Juridicidad
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "Todo tratamiento debe tener una base legal valida."
+  preguntas_auditoria:
+    - pregunta: "Cada actividad de tratamiento tiene asignada una base legal documentada?"
+      revisado_por_legal: true
+    - pregunta: "Se verifica la vigencia de la base legal de forma periodica?"
+      revisado_por_legal: true
+    - pregunta: "Se dispone de evidencia de la base legal para cada tratamiento?"
+      revisado_por_legal: true
+
+- nombre: Transparencia
+  base_normativa: "Art. 10, 13 LOPDP"
+  definicion: "El responsable debe informar al titular de forma clara, precisa y accesible sobre el tratamiento de sus datos."
+  preguntas_auditoria:
+    - pregunta: "Existe un aviso de privacidad accesible y actualizado para cada canal de recoleccion?"
+      revisado_por_legal: false
+    - pregunta: "Se informa al titular sobre la finalidad, base legal y destinatarios antes de recoger sus datos?"
+      revisado_por_legal: false
+    - pregunta: "Los avisos de privacidad estan redactados en lenguaje claro y comprensible?"
+      revisado_por_legal: false
+
+- nombre: Finalidad
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "Los datos personales deben ser tratados con una finalidad determinada, explicita y legitima."
+  preguntas_auditoria:
+    - pregunta: "Cada tratamiento tiene documentada una finalidad especifica y explicita?"
+      revisado_por_legal: false
+    - pregunta: "Se verifica que los datos no se utilicen para finalidades incompatibles con la declarada?"
+      revisado_por_legal: false
+    - pregunta: "Existe un procedimiento para evaluar nuevas finalidades antes de su implementacion?"
+      revisado_por_legal: false
+
+- nombre: Minimizacion
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "Solo deben tratarse los datos personales que sean adecuados, pertinentes y limitados a lo necesario."
+  preguntas_auditoria:
+    - pregunta: "Se ha verificado que cada campo de datos recolectado es estrictamente necesario para la finalidad declarada?"
+      revisado_por_legal: false
+    - pregunta: "Existe un procedimiento de revision periodica para eliminar campos innecesarios?"
+      revisado_por_legal: false
+    - pregunta: "Se aplican tecnicas de seudonimizacion o anonimizacion cuando es posible?"
+      revisado_por_legal: false
+
+- nombre: Confidencialidad
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "Se debe garantizar la confidencialidad de los datos personales durante todo su ciclo de vida."
+  preguntas_auditoria:
+    - pregunta: "Existen acuerdos de confidencialidad firmados con todo el personal que accede a datos personales?"
+      revisado_por_legal: false
+    - pregunta: "Se implementan controles de acceso basados en el principio de menor privilegio?"
+      revisado_por_legal: false
+    - pregunta: "Se registran y auditan los accesos a datos personales?"
+      revisado_por_legal: false
+
+- nombre: Seguridad
+  base_normativa: "Art. 10, 30 LOPDP"
+  definicion: "Se deben implementar medidas tecnicas y organizativas apropiadas para proteger los datos personales."
+  preguntas_auditoria:
+    - pregunta: "Existen medidas tecnicas de seguridad documentadas (cifrado, backups, monitoreo)?"
+      revisado_por_legal: false
+    - pregunta: "Se realizan evaluaciones periodicas de vulnerabilidades y pruebas de penetracion?"
+      revisado_por_legal: false
+    - pregunta: "Existe un plan de respuesta a incidentes de seguridad aprobado y probado?"
+      revisado_por_legal: false
+
+- nombre: Proporcionalidad
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "El tratamiento debe ser proporcional a la finalidad perseguida."
+  preguntas_auditoria:
+    - pregunta: "Se evalua la proporcionalidad del tratamiento respecto al riesgo para los derechos del titular?"
+      revisado_por_legal: false
+    - pregunta: "Existe documentacion que justifique que el tratamiento es el medio menos invasivo disponible?"
+      revisado_por_legal: false
+    - pregunta: "Se realizan pruebas de ponderacion (LIA) cuando el tratamiento se basa en interes legitimo?"
+      revisado_por_legal: false
+
+- nombre: Lealtad
+  base_normativa: "Art. 10 LOPDP"
+  definicion: "El tratamiento debe ser leal, sin engano ni perjuicio para el titular."
+  preguntas_auditoria:
+    - pregunta: "Se verifica que no existan practicas enganosas en la recoleccion de datos?"
+      revisado_por_legal: false
+    - pregunta: "El titular tiene expectativas razonables sobre como se tratan sus datos?"
+      revisado_por_legal: false
+    - pregunta: "Se evita el uso de patrones oscuros (dark patterns) en formularios de consentimiento?"
+      revisado_por_legal: false
+
+- nombre: Exactitud y Calidad
+  base_normativa: "Art. 10 LOPDP / Art. 9 RGLOPDP"
+  definicion: "Los datos personales deben ser exactos y estar actualizados."
+  preguntas_auditoria:
+    - pregunta: "Existen procedimientos para que los titulares actualicen sus datos?"
+      revisado_por_legal: false
+    - pregunta: "Se realizan verificaciones periodicas de la exactitud de los datos almacenados?"
+      revisado_por_legal: false
+    - pregunta: "Se corrigen o eliminan sin dilacion los datos inexactos?"
+      revisado_por_legal: false
+
+- nombre: Limitacion del Almacenamiento
+  base_normativa: "Art. 10 LOPDP / Art. 11 RGLOPDP"
+  definicion: "Los datos personales deben conservarse solo durante el tiempo necesario para cumplir la finalidad."
+  preguntas_auditoria:
+    - pregunta: "Cada tratamiento tiene definido un plazo maximo de conservacion?"
+      revisado_por_legal: false
+    - pregunta: "Existe un procedimiento automatizado o periodico de eliminacion de datos vencidos?"
+      revisado_por_legal: false
+    - pregunta: "Se documenta la justificacion cuando se conservan datos mas alla del plazo inicial?"
+      revisado_por_legal: false
+
+- nombre: Responsabilidad Proactiva
+  base_normativa: "Art. 10 LOPDP / Art. 12 RGLOPDP"
+  definicion: "El responsable debe demostrar el cumplimiento de los principios de proteccion de datos."
+  preguntas_auditoria:
+    - pregunta: "Se mantiene documentacion que demuestre el cumplimiento de cada principio?"
+      revisado_por_legal: false
+    - pregunta: "Se realizan auditorias internas periodicas del programa de proteccion de datos?"
+      revisado_por_legal: false
+    - pregunta: "Existe un programa de capacitacion continua en proteccion de datos para el personal?"
+      revisado_por_legal: false
+
+- nombre: No Discriminacion
+  base_normativa: "Art. 66 CRE / Art. 10 RGLOPDP"
+  definicion: "El tratamiento de datos no debe generar discriminacion ilicita o arbitraria."
+  preguntas_auditoria:
+    - pregunta: "Se evalua si el tratamiento de datos puede generar efectos discriminatorios?"
+      revisado_por_legal: false
+    - pregunta: "Existen controles para prevenir sesgos en decisiones automatizadas?"
+      revisado_por_legal: false
+    - pregunta: "Se monitorean los resultados del tratamiento para detectar patrones discriminatorios?"
+      revisado_por_legal: false
+
+- nombre: Libre Circulacion Controlada
+  base_normativa: "Art. 54 LOPDP / Art. 13 RGLOPDP"
+  definicion: "Las transferencias internacionales de datos deben realizarse con garantias adecuadas."
+  preguntas_auditoria:
+    - pregunta: "Se identifican y documentan todas las transferencias internacionales de datos?"
+      revisado_por_legal: false
+    - pregunta: "Existen garantias adecuadas (SCCs, nivel de adecuacion) para cada transferencia internacional?"
+      revisado_por_legal: false
+    - pregunta: "Se evalua periodicamente el nivel de proteccion del pais destinatario?"
+      revisado_por_legal: false

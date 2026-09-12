@@ -3,9 +3,21 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "main": "./index.json",
   "scripts": {
+    "hash": "tsx scripts/hash.ts",
+    "ingest": "tsx scripts/ingest.ts",
+    "test": "vitest run",
     "build": "echo ok",
     "typecheck": "echo ok"
+  },
+  "dependencies": {
+    "yaml": "^2.7.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "vitest": "^3.2.0",
+    "typescript": "^5.8.0",
+    "@types/node": "^22.0.0"
   }
 }

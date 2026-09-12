@@ -1,0 +1,182 @@
+[
+  {
+    "codigo": "CRE-ART-11",
+    "hash": "ba336fa95cf7f65841110593b17fb3143da5b420500570192a70be7e841d9159",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-16",
+    "hash": "be46216ec911bb222af40c539594d23df82a5ebd2e7dcf7eb4ab2452749c9d93",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-18",
+    "hash": "e0c30a5cb23a44eb48fc7b2a4b5c55b3db95462a89480a12a65274002b52f9f0",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-23",
+    "hash": "5f08a8d9565937241ccc9c7198f83904b9148be28221db87512afe49910a7dfa",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-44",
+    "hash": "d9f5482af7b4cbc5476a7b3751bc324496a8b8c9b6d27c3b3447782f300a6c5c",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-66-19",
+    "hash": "3a7dc2684f1a94b13ccc3761eb359f664c24d49af889c4ec64bec11fef2d5355",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-66-20",
+    "hash": "d5fd206d73e443c98007c348edc4d0bf73ffa77e9db77569e717732ee22d956b",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-66-21",
+    "hash": "fabf8fb41c7a1ce2cdc065c34676b3747508415144d73530d4c0790779e00571",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-75",
+    "hash": "b440749e903ff8168e0f348b32d03a97bac41529fd5186d51b1f83e1493a4887",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-92",
+    "hash": "fc3ed7a5d86fa0c9c97c451ed80af57910ca959d2b839ac461d8de6194f4d639",
+    "version": "1.0"
+  },
+  {
+    "codigo": "CRE-ART-229",
+    "hash": "c84557544e0c7c8a1ace517ce505d5ff0a65dc40a00484adbab27ce173dd9042",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-7",
+    "hash": "7ac141e5841cb7bcc7b8357631251b9a9bfc0ef16b2e31269f844668dc98795f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-9",
+    "hash": "54bb3b8bdfc96f49affe67704e95ecfa73371c88be4dc8f2e12a67716e0f380c",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-10",
+    "hash": "cb2d988c6cb6a116d04af4f1912d5f8cf7a19a276e40c05f42d24287773343cc",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-13",
+    "hash": "b6747ca2a270f23ca6f8af5843b8121c728912749838aade24cf27048ec52d5d",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-17",
+    "hash": "6091f0f23c48e81d9289ed4dd7231da1e4e138279ec5b4608e9326874b3095aa",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-29",
+    "hash": "51e25cea1d1feaa7d1189d60d025fb70d1e6745d5892b3117b3e9443756caa7f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-37",
+    "hash": "9638265710d11d1d986c4a94c14d2514350465fabb83e8c9e4ed8fdbedc52ebd",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-38",
+    "hash": "b18cea24bc1fa9fb9cedf82bfb590a1d7216fa185bbff5bd2795fe499d2e31fe",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-39",
+    "hash": "8dadb1dbbddf4c348887b40d3600d3af2aeac1e9e5c379ba05e7bd5140bf27bf",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-41",
+    "hash": "a08cb8650c497635457a1204a725e2ad47ab2d1daf00f1afd3c2592c4c0db5b0",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-42",
+    "hash": "c04599377c6a8f295d18bd171fd43f4a3d1999c9a8afa7f6358a001b7e0019c5",
+    "version": "1.0"
+  },
+  {
+    "codigo": "LOPDP-ART-54",
+    "hash": "b9a33a6b5da94fdde374160dd5de4fafad92d8680fb6209931890335b9872923",
+    "version": "1.0"
+  },
+  {
+    "codigo": "RGLOPDP-ART-6",
+    "hash": "199e846b40052fe2eaed3a8993ed5d132ec1cbeb4e2c6e48da7155a1020485e2",
+    "version": "1.0"
+  },
+  {
+    "codigo": "RGLOPDP-ART-15",
+    "hash": "9757daecdce2ca02bb4cdf07ca3e4f9373645667050a826cb85bc1124bf537ae",
+    "version": "1.0"
+  },
+  {
+    "codigo": "SGPDP-RES-0005-2026",
+    "hash": "e2554280cd49a595ce71cebcf332b6ae85fec243ab79ee02f02d8ba68b7580c4",
+    "version": "1.0"
+  },
+  {
+    "codigo": "SPDP-RES-2025-0028-R",
+    "hash": "43a724f3bcd5324fd751c4cdbad3d372679235eb4219e362badff1f1e6776a27",
+    "version": "1.0"
+  },
+  {
+    "codigo": "SPDP-RES-2024-0015-R",
+    "hash": "94d71fccff03bc4598927356def8564c0f3430deba19110aaab9737673f242b4",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO27001-6-1",
+    "hash": "eb799d594246d24445a4e90d96692fcae3cee7731ec3a0e833e3a9be82ad3dc2",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO27001-8-2",
+    "hash": "5752cdf88e68cc6a5ff48e86f4da42fc9dc291da732ee59febc1f1c8ab71ea1f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO27701-5-2",
+    "hash": "7c4215f5b5ee4070f25ab6912254a66a452afa879c920e0035fdd10ee749445f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO27701-6-1",
+    "hash": "0488854fad3215a28bfeb0474a5f7c4cbf74bba1ad37bef54ed0ddc3aa80021f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO42001-6-1",
+    "hash": "12c43ef61ac9c60dda85c8b6675808bc7f5b3569e40a499bcdbdb3d1b244693f",
+    "version": "1.0"
+  },
+  {
+    "codigo": "ISO42001-8-4",
+    "hash": "8ac2d7fe6290ac8248a0d02f1b73eb90995f696bb3b29ebdc032914c9067c48d",
+    "version": "1.0"
+  },
+  {
+    "codigo": "NIST-PR-DS-1",
+    "hash": "1571017ceab21a9d855f774d88a2dbdecd23ca296a6515970d08b63d17cc2c68",
+    "version": "1.0"
+  },
+  {
+    "codigo": "NIST-PR-DS-2",
+    "hash": "6bac8d60d3ec6677cc0806f505f9581773ddd7f4c1f2c5224c47723ccff820c8",
+    "version": "1.0"
+  }
+]

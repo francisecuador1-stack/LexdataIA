@@ -1,0 +1,33 @@
+# corpus/nacional/spdp.yaml
+# SPDP — Superintendencia de Proteccion de Datos Personales (Resoluciones)
+# 2 resoluciones, sin controles
+
+- codigo: SPDP-RES-2025-0028-R
+  fuente: SPDP
+  tipo: NACIONAL
+  identificador: "Res. 2025-0028-R"
+  titulo: Obligaciones del DPO ante la SPDP
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Establece las obligaciones del Delegado de Proteccion de Datos ante la Superintendencia de Proteccion de Datos Personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Superintendencia de Proteccion de Datos Personales
+  fecha_emision: "2025-02-01"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 3 · Implementacion", "Fase 5 · Controles"]
+
+- codigo: SPDP-RES-2024-0015-R
+  fuente: SPDP
+  tipo: NACIONAL
+  identificador: "Res. 2024-0015-R"
+  titulo: Metodologia oficial de EIPD
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Define la metodologia oficial para la Evaluacion de Impacto en Proteccion de Datos (EIPD-EC)."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Superintendencia de Proteccion de Datos Personales
+  fecha_emision: "2024-07-01"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario"]

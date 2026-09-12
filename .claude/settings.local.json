@@ -16,7 +16,13 @@
       "Bash(pnpm --filter @lexdata/web dev)",
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__list_tables",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm --filter @lexdata/contracts test)",
+      "Bash(pnpm --filter @lexdata/web test)",
+      "Bash(pnpm --filter @lexdata/api test)",
+      "Bash(pnpm --filter @lexdata/web add -D @vitest/browser jsdom)",
+      "Bash(pnpm --filter @lexdata/legal-corpus test)",
+      "Bash(pnpm --filter @lexdata/legal-corpus hash)"
     ]
   },
   "enableAllProjectMcpServers": true,

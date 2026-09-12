@@ -1,0 +1,11 @@
+import { HealthController } from './health.controller';
+
+describe('HealthController', () => {
+  const controller = new HealthController();
+
+  it('should return ok status', () => {
+    const result = controller.check();
+    expect(result.status).toBe('ok');
+    expect(result.service).toBe('lexdata-api');
+  });
+});

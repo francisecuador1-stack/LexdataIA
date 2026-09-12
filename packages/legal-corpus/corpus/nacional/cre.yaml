@@ -1,0 +1,168 @@
+# corpus/nacional/cre.yaml
+# CRE — Constitucion de la Republica del Ecuador
+# 11 articulos, sin controles
+
+- codigo: CRE-ART-11
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 11"
+  titulo: Principios de aplicacion de los derechos
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Establece los principios para la aplicacion de los derechos constitucionales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-16
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 16"
+  titulo: Derecho a la comunicacion
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Reconoce el derecho a una comunicacion libre, intercultural, incluyente, diversa y participativa."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-18
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 18"
+  titulo: Derecho a buscar, recibir y difundir informacion
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Garantiza el derecho a buscar, recibir, intercambiar, producir y difundir informacion veraz."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-23
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 23"
+  titulo: Derechos civiles
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Reconoce y garantiza los derechos civiles de las personas."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-44
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 44"
+  titulo: Derechos de ninos, ninas y adolescentes
+  categoria: Categorias Especiales
+  resumen_ejecutivo: "Establece la obligacion del Estado de proteger los derechos de ninos, ninas y adolescentes."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas", "Fase 2 · Inventario"]
+
+- codigo: CRE-ART-66-19
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 66.19"
+  titulo: Derecho a la proteccion de datos de caracter personal
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Reconoce el derecho a la proteccion de datos de caracter personal, incluyendo el acceso y la decision sobre su uso."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas", "Fase 4 · Validacion de Principios"]
+
+- codigo: CRE-ART-66-20
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 66.20"
+  titulo: Derecho a la intimidad personal y familiar
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Reconoce y garantiza el derecho a la intimidad personal y familiar."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-66-21
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 66.21"
+  titulo: Derecho al secreto de correspondencia
+  categoria: Derechos Fundamentales
+  resumen_ejecutivo: "Garantiza la inviolabilidad y el secreto de la correspondencia fisica y virtual."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-75
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 75"
+  titulo: Derecho a la tutela judicial efectiva
+  categoria: Garantias Jurisdiccionales
+  resumen_ejecutivo: "Garantiza el derecho de toda persona al acceso gratuito a la justicia y a la tutela efectiva."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]
+
+- codigo: CRE-ART-92
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 92"
+  titulo: Habeas Data
+  categoria: Garantias Jurisdiccionales
+  resumen_ejecutivo: "Establece la accion de habeas data para acceder, conocer y decidir sobre datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas", "Fase 4 · Validacion de Principios"]
+
+- codigo: CRE-ART-229
+  fuente: CRE
+  tipo: NACIONAL
+  identificador: "Art. 229"
+  titulo: Superintendencias
+  categoria: Estructura del Estado
+  resumen_ejecutivo: "Establece la naturaleza y funciones de las superintendencias como organismos de vigilancia y control."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Constituyente
+  fecha_emision: "2008-10-20"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 1 · Normas"]

@@ -17,11 +17,13 @@ import { DocumentosModule } from './documentos/documentos.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { AgenteModule } from './agente/agente.module';
 import { AuditModule } from './audit/audit.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     PrismaModule,
     AuthModule,
+    HealthModule,
     TenantsModule,
     ClientesModule,
     CorpusModule,

@@ -1,0 +1,38 @@
+# corpus/internacional/nist.yaml
+# NIST Cybersecurity Framework — Proteccion de datos
+# 2 controles, 1 control normativo asociado
+
+- codigo: NIST-PR-DS-1
+  fuente: NIST
+  tipo: INTERNACIONAL
+  identificador: "NIST PR.DS-1"
+  titulo: Data-at-Rest
+  categoria: Proteccion de Datos
+  resumen_ejecutivo: "Establece requisitos para la proteccion de datos en reposo mediante cifrado y controles de acceso."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: NIST
+  fecha_emision: "2024-02-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 4 · Validacion de Principios", "Fase 5 · Controles"]
+  controles:
+    - titulo: Cifrado de datos en reposo (AES-256)
+      descripcion: "Control de cifrado de datos en reposo (AES-256)"
+      evidencia_requerida: "Configuracion verificada por auditoria tecnica"
+      fase_phva: HACER
+
+- codigo: NIST-PR-DS-2
+  fuente: NIST
+  tipo: INTERNACIONAL
+  identificador: "NIST PR.DS-2"
+  titulo: Data-in-Transit
+  categoria: Proteccion de Datos
+  resumen_ejecutivo: "Establece requisitos para la proteccion de datos en transito mediante cifrado y protocolos seguros."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: NIST
+  fecha_emision: "2024-02-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 4 · Validacion de Principios", "Fase 5 · Controles"]

@@ -1,0 +1,33 @@
+# corpus/internacional/iso42001.yaml
+# ISO 42001:2023 — Sistema de Gestion de Inteligencia Artificial
+# 2 secciones, sin controles
+
+- codigo: ISO42001-6-1
+  fuente: ISO_42001
+  tipo: INTERNACIONAL
+  identificador: "ISO 42001:2023 §6.1"
+  titulo: Acciones para abordar riesgos y oportunidades de IA
+  categoria: Planificacion
+  resumen_ejecutivo: "Establece los requisitos para identificar y abordar riesgos asociados a sistemas de inteligencia artificial."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: ISO
+  fecha_emision: "2023-12-18"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+
+- codigo: ISO42001-8-4
+  fuente: ISO_42001
+  tipo: INTERNACIONAL
+  identificador: "ISO 42001:2023 §8.4"
+  titulo: Evaluacion de impacto del sistema de IA
+  categoria: Operacion
+  resumen_ejecutivo: "Requiere la evaluacion del impacto de los sistemas de IA en individuos y grupos."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: ISO
+  fecha_emision: "2023-12-18"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 5 · Controles"]

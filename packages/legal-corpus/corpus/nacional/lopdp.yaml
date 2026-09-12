@@ -1,0 +1,254 @@
+# corpus/nacional/lopdp.yaml
+# LOPDP — Ley Organica de Proteccion de Datos Personales (Ecuador)
+# 12 articulos con 15 controles normativos asociados
+
+- codigo: LOPDP-ART-7
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 7"
+  titulo: Consentimiento del titular
+  categoria: Bases de Legitimacion
+  resumen_ejecutivo: "Regula las condiciones del consentimiento como base legal para el tratamiento de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Formulario de consentimiento informado
+      descripcion: "Control de formulario de consentimiento informado"
+      evidencia_requerida: "Registro de consentimientos firmados o electronicos"
+      fase_phva: PLANIFICAR
+    - titulo: Mecanismo de revocacion de consentimiento
+      descripcion: "Control de mecanismo de revocacion de consentimiento"
+      evidencia_requerida: "Pantalla o formulario de revocacion activo"
+      fase_phva: PLANIFICAR
+
+- codigo: LOPDP-ART-9
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 9"
+  titulo: Obligacion legal o reglamentaria
+  categoria: Bases de Legitimacion
+  resumen_ejecutivo: "Establece la obligacion legal o reglamentaria como base licita para el tratamiento de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Inventario de obligaciones legales aplicables
+      descripcion: "Control de inventario de obligaciones legales aplicables"
+      evidencia_requerida: "Documento con base legal y norma habilitante"
+      fase_phva: PLANIFICAR
+
+- codigo: LOPDP-ART-10
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 10"
+  titulo: Principios aplicables al tratamiento
+  categoria: Principios Rectores
+  resumen_ejecutivo: "Define los 13 principios rectores que rigen todo tratamiento de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: VERIFICAR
+  modulos_relacionados: ["Fase 4 · Validacion de Principios", "Fase 6 · Auditoria"]
+  controles:
+    - titulo: Auditoria de principios por tratamiento (13 principios)
+      descripcion: "Control de auditoria de principios por tratamiento"
+      evidencia_requerida: "Acta de auditoria con checklist"
+      fase_phva: VERIFICAR
+    - titulo: Politica de proteccion de datos publicada
+      descripcion: "Control de politica de proteccion de datos publicada"
+      evidencia_requerida: "URL publica o acuse de recibo interno"
+      fase_phva: PLANIFICAR
+
+- codigo: LOPDP-ART-13
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 13"
+  titulo: Deber de informacion
+  categoria: Derechos del Titular
+  resumen_ejecutivo: "Establece el deber de informar al titular sobre el tratamiento de sus datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 4 · Validacion de Principios", "Fase 5 · Controles"]
+  controles:
+    - titulo: Aviso de privacidad y politica publicados
+      descripcion: "Control de aviso de privacidad y politica publicados"
+      evidencia_requerida: "Aviso vigente en web o documento entregado"
+      fase_phva: HACER
+
+- codigo: LOPDP-ART-17
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 17"
+  titulo: Proteccion reforzada — Menores de edad
+  categoria: Categorias Especiales
+  resumen_ejecutivo: "Establece proteccion reforzada para el tratamiento de datos de menores de edad."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+
+- codigo: LOPDP-ART-29
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 29"
+  titulo: Derecho frente a decisiones automatizadas
+  categoria: Derechos del Titular
+  resumen_ejecutivo: "Reconoce el derecho del titular a no ser objeto de decisiones basadas unicamente en tratamiento automatizado."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 5 · Controles"]
+  controles:
+    - titulo: Mecanismo de revision humana de decisiones automatizadas
+      descripcion: "Control de mecanismo de revision humana de decisiones automatizadas"
+      evidencia_requerida: "Canal habilitado + tiempo de respuesta"
+      fase_phva: HACER
+
+- codigo: LOPDP-ART-37
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 37"
+  titulo: Registro de actividades de tratamiento
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Establece la obligacion de mantener un registro de actividades de tratamiento (RAT)."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 5 · Controles"]
+  controles:
+    - titulo: RAT actualizado
+      descripcion: "Control de RAT actualizado"
+      evidencia_requerida: "RAT vigente con fecha de ultima revision"
+      fase_phva: HACER
+
+- codigo: LOPDP-ART-38
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 38"
+  titulo: Relacion responsable-encargado
+  categoria: Encargados
+  resumen_ejecutivo: "Regula la relacion entre responsable y encargado del tratamiento de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 4 · Validacion de Principios", "Fase 5 · Controles"]
+  controles:
+    - titulo: Contrato de encargado formalizado
+      descripcion: "Control de contrato de encargado formalizado"
+      evidencia_requerida: "Contrato firmado con clausulas LOPDP"
+      fase_phva: HACER
+
+- codigo: LOPDP-ART-39
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 39"
+  titulo: Evaluacion de impacto en proteccion de datos (EIPD)
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Establece la obligacion de realizar evaluaciones de impacto en proteccion de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Evaluacion de impacto documentada
+      descripcion: "Control de evaluacion de impacto documentada"
+      evidencia_requerida: "Informe EIPD con firma del DPO"
+      fase_phva: PLANIFICAR
+    - titulo: Registro de tratamientos con EIPD obligatoria
+      descripcion: "Control de registro de tratamientos con EIPD obligatoria"
+      evidencia_requerida: "Lista actualizada en RAT"
+      fase_phva: PLANIFICAR
+
+- codigo: LOPDP-ART-41
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 41"
+  titulo: Notificacion de brechas de seguridad
+  categoria: Seguridad
+  resumen_ejecutivo: "Establece la obligacion de notificar brechas de seguridad a la autoridad y a los titulares."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: HACER
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 5 · Controles"]
+  controles:
+    - titulo: Protocolo de notificacion 72h a SPDP
+      descripcion: "Control de protocolo de notificacion 72h a SPDP"
+      evidencia_requerida: "Protocolo documentado y capacitacion"
+      fase_phva: HACER
+    - titulo: Plan de respuesta a incidentes
+      descripcion: "Control de plan de respuesta a incidentes"
+      evidencia_requerida: "Plan aprobado y simulacro anual"
+      fase_phva: HACER
+
+- codigo: LOPDP-ART-42
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 42"
+  titulo: Funciones del DPO
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Define las funciones y responsabilidades del Delegado de Proteccion de Datos."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 3 · Implementacion", "Fase 5 · Controles"]
+  controles:
+    - titulo: DPO designado y notificado a la SPDP
+      descripcion: "Control de DPO designado y notificado a la SPDP"
+      evidencia_requerida: "Comunicacion a la SPDP + nombramiento"
+      fase_phva: PLANIFICAR
+
+- codigo: LOPDP-ART-54
+  fuente: LOPDP
+  tipo: NACIONAL
+  identificador: "Art. 54"
+  titulo: Transferencias internacionales
+  categoria: Transferencias
+  resumen_ejecutivo: "Regula las condiciones para la transferencia internacional de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Asamblea Nacional
+  fecha_emision: "2021-05-26"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Garantias de transferencia internacional
+      descripcion: "Control de garantias de transferencia internacional"
+      evidencia_requerida: "SCCs o nivel de adecuacion"
+      fase_phva: PLANIFICAR

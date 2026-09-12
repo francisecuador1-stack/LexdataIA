@@ -53,8 +53,8 @@ export function verifyChain(
   recomputeContentHash?: (row: unknown) => string,
 ): number {
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const expectedPrev = i === 0 ? GENESIS : rows[i - 1].hashSha256;
+    const row = rows[i]!;
+    const expectedPrev = i === 0 ? GENESIS : rows[i - 1]!.hashSha256;
 
     if (row.prevHash !== expectedPrev) return i;
     if (row.chainIndex !== i) return i;

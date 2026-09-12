@@ -1,0 +1,18 @@
+# corpus/nacional/sgpdp.yaml
+# SGPDP — Superintendencia General de Proteccion de Datos Personales (Resoluciones)
+# 1 resolucion, sin controles
+
+- codigo: SGPDP-RES-0005-2026
+  fuente: SGPDP
+  tipo: NACIONAL
+  identificador: "Res. 0005-2026-SGPDP"
+  titulo: Categorizacion ampliada — datos biometricos y comportamiento digital
+  categoria: Categorias Especiales
+  resumen_ejecutivo: "Amplia la categorizacion de datos personales incluyendo datos biometricos y de comportamiento digital como categorias de proteccion reforzada."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Superintendencia de Proteccion de Datos Personales
+  fecha_emision: "2026-01-15"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario"]

@@ -1,0 +1,43 @@
+# corpus/internacional/iso27701.yaml
+# ISO 27701:2019 — Extension de privacidad para ISO 27001/27002
+# 2 secciones, 2 controles
+
+- codigo: ISO27701-5-2
+  fuente: ISO_27701
+  tipo: INTERNACIONAL
+  identificador: "ISO 27701:2019 §5.2"
+  titulo: Politica de privacidad
+  categoria: Liderazgo
+  resumen_ejecutivo: "Establece los requisitos para la politica de privacidad de la organizacion."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: ISO
+  fecha_emision: "2019-08-01"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 3 · Implementacion", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Politica de privacidad aprobada por direccion
+      descripcion: "Control de politica de privacidad aprobada por direccion"
+      evidencia_requerida: "Acta firmada por Gerente General"
+      fase_phva: PLANIFICAR
+
+- codigo: ISO27701-6-1
+  fuente: ISO_27701
+  tipo: INTERNACIONAL
+  identificador: "ISO 27701:2019 §6.1"
+  titulo: Acciones para abordar riesgos y oportunidades de privacidad
+  categoria: Planificacion
+  resumen_ejecutivo: "Establece los requisitos para el analisis de riesgos de privacidad."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: ISO
+  fecha_emision: "2019-08-01"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 2 · Inventario", "Fase 4 · Validacion de Principios"]
+  controles:
+    - titulo: Analisis de riesgos de privacidad anual
+      descripcion: "Control de analisis de riesgos de privacidad anual"
+      evidencia_requerida: "Informe con fecha y firma del DPO"
+      fase_phva: PLANIFICAR

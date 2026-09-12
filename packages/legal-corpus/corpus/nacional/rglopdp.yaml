@@ -1,0 +1,33 @@
+# corpus/nacional/rglopdp.yaml
+# RGLOPDP — Reglamento General a la LOPDP (Ecuador)
+# 2 articulos, sin controles
+
+- codigo: RGLOPDP-ART-6
+  fuente: RGLOPDP
+  tipo: NACIONAL
+  identificador: "Art. 6"
+  titulo: Desarrollo del principio de juridicidad
+  categoria: Principios Rectores
+  resumen_ejecutivo: "Desarrolla el principio de juridicidad para el tratamiento de datos personales."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Presidencia de la Republica
+  fecha_emision: "2023-11-06"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 4 · Validacion de Principios"]
+
+- codigo: RGLOPDP-ART-15
+  fuente: RGLOPDP
+  tipo: NACIONAL
+  identificador: "Art. 15"
+  titulo: Designacion obligatoria del DPO
+  categoria: Obligaciones del Responsable
+  resumen_ejecutivo: "Establece los criterios para la designacion obligatoria del Delegado de Proteccion de Datos."
+  texto_normativo: "TODO: verificar con LEGAL_ADMIN"
+  organismo_emisor: Presidencia de la Republica
+  fecha_emision: "2023-11-06"
+  version: "1.0"
+  estado: VIGENTE
+  fase_phva: PLANIFICAR
+  modulos_relacionados: ["Fase 3 · Implementacion"]
