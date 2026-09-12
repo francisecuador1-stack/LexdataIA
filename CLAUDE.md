@@ -25,16 +25,34 @@ Monorepo pnpm + Turborepo.
 apps/
   web/         React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui + Recharts
                TanStack Query (server state) + Zustand (UI state) + react-hook-form + zod
-  api/         NestJS 10 + TypeScript + Prisma + PostgreSQL 16 (pgvector) + BullMQ (Redis)
+               Deploy: Vercel
+  api/         NestJS 10 + TypeScript + Prisma + Supabase (PostgreSQL 17 + pgvector)
+               Deploy: contenedor (Railway / Fly / VPS)
   mobile/      Flutter 3.x + Riverpod + go_router + dio + freezed + drift + fl_chart
   worker/      Jobs: ingesta de corpus, embeddings, PDFs, alertas 72h, recordatorios
+               Deploy: contenedor (mismo host que api)
 packages/
   contracts/   Esquemas zod + tipos TS compartidos web↔api (fuente de verdad)
   legal-corpus/ Corpus normativo versionado (YAML/JSON + hash SHA-256 por norma)
   ui/          Design system compartido (tokens + componentes base)
+supabase/
+  migrations/  DDL versionado — fuente de verdad del esquema (INV-12)
+  config.toml  Configuración del proyecto Supabase
 ```
-Infra: Postgres 16 + pgvector, Redis, almacenamiento S3-compatible con object-lock
-(MinIO en dev), Anthropic API para MARK AI, Playwright/Chromium para PDF.
+Infra:
+  DB: Supabase (PostgreSQL 17 + pgvector + Auth + Storage). Migraciones en
+  `supabase/migrations/`, nunca DDL ad-hoc por MCP ni consola.
+  Tres conexiones desde el API (ver `.env.example`):
+    DATABASE_URL   — pooler (transaction mode), rol `lexdata_app` (NOBYPASSRLS)
+    DIRECT_URL     — conexión directa para migraciones Prisma
+    SYSTEM_DB_URL  — rol `postgres` solo en `SystemDbService` para admin de tenants
+  Storage: Supabase Storage (buckets `evidencias`, `documentos`, `certificados`)
+  con object-lock para evidencias (INV-3).
+  Redis: para BullMQ (colas del worker). Upstash o Redis autoalojado.
+  IA: Anthropic API para MARK AI.
+  PDF: Playwright/Chromium en el worker.
+  Automatización: n8n solo para avisos (notificaciones, alertas 72h, recordatorios).
+  No orquesta lógica de negocio.
 Convenciones
 Idioma: toda la UI, los textos legales, los enums de dominio y los nombres de
 entidades de negocio van en español. El código (funciones, variables técnicas,
@@ -58,6 +76,9 @@ INV-7    Un tratamiento marcado `CON_OBSERVACIONES` bloquea el avance de fase de
 INV-8    Riesgo `ALTO` o `CRÍTICO` ⇒ EIPD obligatoria y alerta al DPO (RN-201).
 INV-9    Incidente de seguridad ⇒ reloj de 72 h desde `fecha_deteccion` para notificar a la SPDP (Art. 41 LOPDP); el estado del reloj se calcula en servidor, nunca en cliente.
 INV-10    Certificado de capacitación solo si `puntaje >= 70`.
+INV-11    El tráfico de request usa el rol `lexdata_app` (NOBYPASSRLS) con `set local request.jwt.claims`; la conexión privilegiada (rol `postgres`) vive solo en `SystemDbService` y se usa exclusivamente para administración de tenants y migraciones de catálogo.
+INV-12    Todo DDL nace como archivo de migración en `supabase/migrations/`. El MCP de Supabase no crea esquema. Ninguna tabla existe en la nube sin su migración correspondiente en el repo.
+INV-13    Los roles `anon` y `authenticated` de Supabase no tienen privilegios sobre las tablas de negocio. Solo `lexdata_app` (vía `SET ROLE`) accede a los datos.
 Roles y permisos
 Rol    Puede
 `SUPERADMIN`    Gestión de tenants, planes, usuarios globales.
