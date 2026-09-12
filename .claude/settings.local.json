@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm -v)",
+      "Bash(npm ls:*)",
+      "Bash(npm -v)",
+      "Bash(corepack enable:*)",
+      "Bash(corepack prepare:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm --filter @lexdata/contracts build)",
+      "Bash(pnpm --filter @lexdata/web typecheck)",
+      "Bash(pnpm --filter @lexdata/api typecheck)",
+      "Bash(pnpm --filter @lexdata/worker typecheck)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "google-drive",
+    "vercel"
+  ]
+}

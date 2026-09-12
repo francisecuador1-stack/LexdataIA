@@ -1,0 +1,11 @@
+{
+  "name": "@lexdata/legal-corpus",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./index.json",
+  "scripts": {
+    "build": "echo ok",
+    "typecheck": "echo ok"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "descripcion": "Corpus normativo versionado — LEXDATA IA",
+    "nota": "Cada norma se versiona con hash SHA-256. Solo LEGAL_ADMIN puede modificar.",
+    "version": "0.1.0"
+  },
+  "normas": []
+}
