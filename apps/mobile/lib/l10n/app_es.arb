@@ -1,0 +1,20 @@
+{
+  "@@locale": "es",
+  "appTitle": "LEXDATA IA",
+  "sgpdpSubtitle": "Sistema SGPDP · LOPDP Ecuador",
+  "login": "Iniciar sesión",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "required": "Requerido",
+  "invalidEmail": "Correo inválido",
+  "recoverPassword": "Recuperar contraseña",
+  "noConnection": "Sin conexión a internet",
+  "retry": "Reintentar",
+  "noData": "No hay datos disponibles",
+  "hashCopied": "Hash copiado al portapapeles",
+  "markAiDisclaimer": "MARK AI propone y documenta; las aprobaciones, cierres y firmas son del DPO humano.",
+  "offlineMode": "Modo sin conexión",
+  "expired": "Vencido",
+  "urgent": "URGENTE",
+  "pending": "PENDIENTE"
+}

@@ -1,0 +1,89 @@
+name: lexdata_mobile
+description: "LEXDATA IA — SGPDP LOPDP Ecuador (app móvil)"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Networking
+  dio: ^5.7.0
+  retrofit: ^4.4.1
+  connectivity_plus: ^6.1.4
+
+  # Local storage & offline
+  drift: ^2.24.1
+  sqlite3_flutter_libs: ^0.5.30
+  flutter_secure_storage: ^9.2.4
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # Serialization
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Auth & security
+  local_auth: ^2.3.0
+  crypto: ^3.0.6
+
+  # Push notifications
+  firebase_core: ^3.13.0
+  firebase_messaging: ^15.2.4
+
+  # Utilities
+  intl: any
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.4
+  image_picker: ^1.1.2
+  file_picker: ^8.1.7
+  image_compression_flutter: ^1.0.4
+  permission_handler: ^11.3.1
+  speech_to_text: ^7.0.0
+
+  # UI
+  cupertino_icons: ^1.0.8
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  qr_flutter: ^4.1.0
+
+  # Observability
+  sentry_flutter: ^8.14.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Code generation
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.5
+  freezed: ^3.1.0
+  json_serializable: ^6.9.4
+  retrofit_generator: ^9.1.8
+  drift_dev: ^2.24.1
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.5
+  mockito: ^5.4.5
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  # Localization
+  generate: true

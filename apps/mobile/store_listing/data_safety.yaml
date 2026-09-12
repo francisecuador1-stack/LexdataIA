@@ -1,0 +1,67 @@
+# Google Play Data Safety declaration — MUST match actual app behavior.
+# La app de una empresa de protección de datos no puede fallar aquí.
+
+data_collected:
+  - category: Personal info
+    types:
+      - Name
+      - Email address
+    purpose: App functionality, Account management
+    required: true
+    shared: false
+    encrypted_in_transit: true
+
+  - category: App activity
+    types:
+      - App interactions (audit log events)
+    purpose: App functionality, Analytics
+    required: true
+    shared: false
+    encrypted_in_transit: true
+
+  - category: Photos and videos
+    types:
+      - Photos (evidence capture)
+    purpose: App functionality
+    required: false
+    shared: false  # uploaded to user's own tenant, not shared with third parties
+    encrypted_in_transit: true
+
+  - category: Files and docs
+    types:
+      - Files (evidence uploads)
+    purpose: App functionality
+    required: false
+    shared: false
+    encrypted_in_transit: true
+
+  - category: Device or other IDs
+    types:
+      - Device ID (push notification token)
+    purpose: App functionality (push notifications)
+    required: false
+    shared: true  # shared with Firebase Cloud Messaging
+    encrypted_in_transit: true
+
+data_NOT_collected:
+  - Location
+  - Financial info
+  - Health and fitness
+  - Messages
+  - Contacts
+  - Calendar
+  - Web browsing
+  - Search history
+
+security_practices:
+  data_encrypted_in_transit: true
+  data_deletion_request: true  # user can request data deletion
+  independent_security_review: false  # to be updated after audit
+
+notes: |
+  La app almacena tokens de autenticación de forma segura en
+  Keychain (iOS) / Keystore (Android). Los hashes SHA-256 de las
+  evidencias se calculan localmente y no contienen datos personales.
+  Los datos de crash reporting (Sentry) son anonimizados y no
+  contienen PII. Push tokens se comparten con Firebase Cloud
+  Messaging exclusivamente para la entrega de notificaciones.

@@ -1,0 +1,106 @@
+# ---------------------------------------------------------------------------
+# LEXDATA IA — Backup Configuration
+#
+# Strategy:
+#   - PostgreSQL: PITR (continuous WAL archiving) + daily base snapshots
+#   - Supabase Storage: versioning + object-lock for evidencias bucket
+#   - Encrypted at rest (AES-256) and in transit (TLS 1.3)
+#   - 90-day retention for daily snapshots
+#   - Cross-region replication for disaster recovery
+# ---------------------------------------------------------------------------
+
+postgres:
+  # Point-in-Time Recovery via continuous WAL archiving
+  pitr:
+    enabled: true
+    wal_archive:
+      destination: "s3://lexdata-backups-wal/{{ env }}"
+      compression: lz4
+      encryption: AES-256
+      max_wal_senders: 3
+
+  # Daily base backup snapshots
+  daily_snapshot:
+    enabled: true
+    schedule: "0 2 * * *"  # 02:00 ECT (America/Guayaquil) daily
+    destination: "s3://lexdata-backups-daily/{{ env }}"
+    format: custom  # pg_dump --format=custom
+    compression: true
+    encryption:
+      algorithm: AES-256
+      key_source: aws_kms
+      kms_key_id: "{{ BACKUP_KMS_KEY_ID }}"
+    retention:
+      daily: 90    # 90 days of daily snapshots
+      weekly: 52   # 52 weekly snapshots (1 year)
+      monthly: 24  # 24 monthly snapshots (2 years)
+    verification:
+      # Restore to a temporary instance and run integrity checks
+      enabled: true
+      schedule: "0 6 * * 0"  # Every Sunday at 06:00
+      target: "lexdata-backup-verify"
+
+  # Connection settings for backup jobs
+  connection:
+    host: "{{ POSTGRES_HOST }}"
+    port: 5432
+    database: "{{ POSTGRES_DB }}"
+    user: "backup_readonly"  # Dedicated read-only role for backups
+    ssl: require
+
+supabase_storage:
+  evidencias:
+    # INV-3: Append-only vault — versioning ensures no overwrites
+    bucket: evidencias
+    versioning: true
+    object_lock:
+      enabled: true
+      mode: GOVERNANCE
+      default_retention_days: 1825  # 5 years (matches retencion_hasta)
+    replication:
+      enabled: true
+      destination_region: "us-east-1"
+
+  documentos:
+    bucket: documentos
+    versioning: true
+    object_lock:
+      enabled: false  # Documents can be versioned but not locked
+    replication:
+      enabled: true
+      destination_region: "us-east-1"
+
+  certificados:
+    bucket: certificados
+    versioning: true
+    object_lock:
+      enabled: false
+
+# Restoration procedure reference
+restoration:
+  # Full restore from daily snapshot
+  script: "infra/scripts/restore-backup.sh"
+  steps:
+    - "Stop API and worker services"
+    - "Restore pg_dump snapshot to target database"
+    - "Apply WAL logs up to desired recovery point (if PITR needed)"
+    - "Verify hash chain integrity (audit_log + evidencias)"
+    - "Restart services and run health checks"
+    - "Notify DPO and engineering team"
+
+  # PITR (point-in-time recovery)
+  pitr_steps:
+    - "Identify target recovery timestamp from audit_log or incident report"
+    - "Restore base snapshot immediately preceding target timestamp"
+    - "Replay WAL to exact recovery point"
+    - "Validate tenant data integrity"
+    - "Document recovery in audit_log"
+
+# Monitoring
+monitoring:
+  # Alert if no successful backup in 24h (see infra/alerts/alert-rules.yaml)
+  metric_name: backup_last_success_timestamp_seconds
+  alert_threshold_hours: 24
+  notification_channels:
+    - slack_engineering
+    - email_dpo

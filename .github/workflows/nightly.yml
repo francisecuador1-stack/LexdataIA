@@ -1,0 +1,159 @@
+name: Nightly Jobs
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # Daily at 03:00 UTC
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "12.4.1"
+
+jobs:
+  # ---------- Verify audit_log hash chain ----------
+  verify-audit-chain:
+    name: Verify Audit Log Hash Chain
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify hash chain integrity
+        run: |
+          set -euo pipefail
+
+          API="${{ vars.STAGING_API_URL }}"
+          TOKEN="${{ secrets.STAGING_SYSTEM_TOKEN }}"
+
+          echo "Verifying audit_log hash chain on staging..."
+
+          RESPONSE=$(curl -sf \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            "$API/api/v1/admin/audit-log/verify-chain" 2>&1) || {
+            echo "::error::Failed to call audit-log verification endpoint."
+            echo "Response: $RESPONSE"
+            exit 1
+          }
+
+          IS_VALID=$(echo "$RESPONSE" | jq -r '.valid // false')
+          CHECKED=$(echo "$RESPONSE" | jq -r '.recordsChecked // 0')
+          BROKEN_AT=$(echo "$RESPONSE" | jq -r '.brokenAtId // "none"')
+
+          echo "Records checked: $CHECKED"
+          echo "Chain valid: $IS_VALID"
+
+          if [[ "$IS_VALID" != "true" ]]; then
+            echo "::error::Audit log hash chain is BROKEN at record: $BROKEN_AT"
+            echo "This is a critical integrity violation (INV-4)."
+            exit 1
+          fi
+
+          echo "::notice::Audit log hash chain verified ($CHECKED records, all valid)."
+
+  # ---------- Reindex legal corpus ----------
+  reindex-corpus:
+    name: Reindex Legal Corpus
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Trigger corpus reindex
+        run: |
+          set -euo pipefail
+
+          API="${{ vars.STAGING_API_URL }}"
+          TOKEN="${{ secrets.STAGING_SYSTEM_TOKEN }}"
+
+          echo "Triggering corpus reindex on staging..."
+
+          RESPONSE=$(curl -sf \
+            -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            "$API/api/v1/admin/corpus/reindex" 2>&1) || {
+            echo "::warning::Failed to trigger corpus reindex."
+            echo "Response: $RESPONSE"
+            exit 0
+          }
+
+          JOB_ID=$(echo "$RESPONSE" | jq -r '.jobId // "unknown"')
+          echo "::notice::Corpus reindex job queued: $JOB_ID"
+
+  # ---------- Agent token consumption report ----------
+  token-report:
+    name: Agent Token Consumption Report
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Fetch token consumption
+        id: tokens
+        run: |
+          set -euo pipefail
+
+          API="${{ vars.STAGING_API_URL }}"
+          TOKEN="${{ secrets.STAGING_SYSTEM_TOKEN }}"
+
+          echo "Fetching MARK AI token consumption per tenant..."
+
+          RESPONSE=$(curl -sf \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            "$API/api/v1/admin/mark-ai/token-usage?period=24h" 2>&1) || {
+            echo "::warning::Failed to fetch token consumption report."
+            echo "Response: $RESPONSE"
+            echo "report=unavailable" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+
+          echo "report<<TOKEN_EOF" >> "$GITHUB_OUTPUT"
+          echo "$RESPONSE" | jq '.' >> "$GITHUB_OUTPUT"
+          echo "TOKEN_EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Post summary
+        run: |
+          echo "## MARK AI Token Consumption (last 24h)"
+          echo ""
+          if [[ "${{ steps.tokens.outputs.report }}" == "unavailable" ]]; then
+            echo "Report unavailable — endpoint may not be configured yet."
+          else
+            echo '${{ steps.tokens.outputs.report }}' | jq -r '
+              .tenants[]? |
+              "- \(.tenantName): \(.inputTokens) input / \(.outputTokens) output (cost: $\(.estimatedCost))"
+            ' 2>/dev/null || echo "No tenant data available."
+          fi
+
+  # ---------- Post nightly summary ----------
+  summary:
+    name: Post Nightly Summary
+    runs-on: ubuntu-latest
+    needs: [verify-audit-chain, reindex-corpus, token-report]
+    if: always()
+
+    steps:
+      - name: Build and send summary
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          CHAIN_STATUS="${{ needs.verify-audit-chain.result }}"
+          REINDEX_STATUS="${{ needs.reindex-corpus.result }}"
+          TOKEN_STATUS="${{ needs.token-report.result }}"
+
+          SUMMARY="LEXDATA IA Nightly Report — $DATE\n"
+          SUMMARY+="---\n"
+          SUMMARY+="Audit log chain: $CHAIN_STATUS\n"
+          SUMMARY+="Corpus reindex: $REINDEX_STATUS\n"
+          SUMMARY+="Token report: $TOKEN_STATUS\n"
+
+          if [[ "$CHAIN_STATUS" == "failure" ]]; then
+            SUMMARY+="\n⚠️ CRITICAL: Audit log hash chain integrity violation detected (INV-4)."
+          fi
+
+          echo -e "$SUMMARY"
+
+          # TODO: Post to monitoring channel (Slack / Discord / email)
+          # curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          #   -H "Content-Type: application/json" \
+          #   -d "{\"text\": \"$(echo -e "$SUMMARY")\"}"

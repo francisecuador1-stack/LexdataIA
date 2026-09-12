@@ -1,0 +1,28 @@
+LEXDATA IA — Sistema de Gestión de Protección de Datos Personales (SGPDP)
+
+Plataforma de cumplimiento de la Ley Orgánica de Protección de Datos Personales (LOPDP) del Ecuador, con asistencia de inteligencia artificial.
+
+FUNCIONES PRINCIPALES:
+
+• Dashboard PHVA: Monitoreo en tiempo real del estado de cumplimiento del SGPDP con radar de madurez por fase, KPIs y alertas de urgencia.
+
+• Gestión de Incidentes: Registro y seguimiento de incidentes de seguridad con reloj de 72 horas (Art. 41 LOPDP) para notificación a la SPDP.
+
+• Aprobaciones y Firma Digital: Bandeja unificada de documentos pendientes con firma por lote, PIN de seguridad y trazabilidad con hash SHA-256.
+
+• Motor Normativo Offline: Consulta de 36 normas nacionales e internacionales sin conexión, con integridad verificada por hash criptográfico (RN-004).
+
+• Evidencias con Integridad: Captura y carga de evidencias desde cámara o archivos con hash SHA-256 calculado en el dispositivo.
+
+• Capacitaciones E-Learning: 8 módulos de formación en protección de datos con evaluación, certificado con QR verificable y consumo offline.
+
+• MARK AI — Agente DPO Operativo: Asistente de inteligencia artificial que analiza, documenta y propone. Las decisiones finales siempre son del DPO humano.
+
+SEGURIDAD:
+- Autenticación con MFA (TOTP) y desbloqueo biométrico
+- Tokens almacenados en Keychain/Keystore (nunca en almacenamiento inseguro)
+- PIN de firma separado para operaciones legales
+- Hash SHA-256 en toda la cadena de evidencias
+- Cierre de sesión automático por inactividad
+
+Desarrollado por COGNITEX (Quito, Ecuador) para DPOs certificados y empresas responsables del tratamiento de datos personales.

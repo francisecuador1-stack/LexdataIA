@@ -1,0 +1,124 @@
+# ---------------------------------------------------------------------------
+# LEXDATA IA — Prometheus Alert Rules
+#
+# Delivered via webhook to email / Slack.
+# Each alert maps to a section in docs/RUNBOOK.md.
+# ---------------------------------------------------------------------------
+
+groups:
+  - name: lexdata_incidentes
+    rules:
+      # INV-9: 72h clock — incident approaching SPDP notification deadline
+      - alert: IncidenteNear24hDeadline
+        expr: incidentes_activos{deadline_band="<24h"} > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: legal
+        annotations:
+          summary: "Incidente(s) within 24h of the 72h SPDP notification deadline"
+          description: >
+            {{ $value }} incidente(s) have less than 24 hours remaining before
+            the Art. 41 LOPDP notification deadline expires.  Immediate DPO
+            action required.
+          runbook: "docs/RUNBOOK.md#incidente-near-24h-deadline"
+
+  - name: lexdata_integrity
+    rules:
+      # INV-3 / INV-4: Hash chain integrity
+      - alert: HashChainBreakDetected
+        expr: hash_chain_breaks_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: engineering
+        annotations:
+          summary: "Audit log or evidence hash chain break detected"
+          description: >
+            A break in the append-only hash chain has been detected.
+            This may indicate data tampering or a software bug.
+            Investigate immediately.
+          runbook: "docs/RUNBOOK.md#hash-chain-break"
+
+  - name: lexdata_signatures
+    rules:
+      # Signature queue stale items
+      - alert: SignatureQueueStale
+        expr: >
+          time() - max(solicitudes_firma_created_at_seconds) > 172800
+        for: 10m
+        labels:
+          severity: warning
+          team: legal
+        annotations:
+          summary: "Signature queue contains items older than 48 hours"
+          description: >
+            solicitudes_firma items have been pending for more than 48 hours.
+            DPO should review and action pending signatures.
+          runbook: "docs/RUNBOOK.md#signature-queue-stale"
+
+  - name: lexdata_agent
+    rules:
+      # MARK AI job failure
+      - alert: AgentJobFailure
+        expr: increase(bullmq_job_failures_total{queue="agent"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: engineering
+        annotations:
+          summary: "MARK AI agent job failed"
+          description: >
+            One or more agent jobs have failed in the last 15 minutes.
+            Check worker logs and BullMQ dashboard.
+          runbook: "docs/RUNBOOK.md#agent-job-failure"
+
+      # Agent token budget exhausted
+      - alert: AgentTokenBudgetExhausted
+        expr: >
+          sum(increase(agent_tokens_total[24h])) by (tenant_id) > 500000
+        for: 5m
+        labels:
+          severity: warning
+          team: engineering
+        annotations:
+          summary: "MARK AI token budget exceeded for tenant {{ $labels.tenant_id }}"
+          description: >
+            Tenant {{ $labels.tenant_id }} has consumed more than 500k tokens
+            in 24 hours.  Review for runaway agent loops.
+          runbook: "docs/RUNBOOK.md#agent-token-budget"
+
+  - name: lexdata_availability
+    rules:
+      # Error rate spike
+      - alert: HighErrorRate
+        expr: >
+          sum(rate(http_errors_total{status_code=~"5.."}[5m]))
+          / sum(rate(http_request_duration_seconds_count[5m]))
+          > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          team: engineering
+        annotations:
+          summary: "API error rate exceeds 2% over 5 minutes"
+          description: >
+            The 5xx error rate is {{ $value | humanizePercentage }}.
+            Check API logs, recent deployments, and database connectivity.
+          runbook: "docs/RUNBOOK.md#high-error-rate"
+
+  - name: lexdata_backup
+    rules:
+      # Backup failure
+      - alert: BackupFailure
+        expr: backup_last_success_timestamp_seconds < (time() - 86400)
+        for: 15m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Database backup has not succeeded in over 24 hours"
+          description: >
+            The last successful backup is older than 24 hours.
+            Verify backup job health, storage connectivity, and disk space.
+          runbook: "docs/RUNBOOK.md#backup-failure"

@@ -25,7 +25,16 @@
       "Bash(pnpm --filter @lexdata/legal-corpus hash)",
       "Bash(pnpm --filter @lexdata/api exec prisma generate)",
       "Bash(node -e ':*)",
-      "Bash(sort -t: -k1,1)"
+      "Bash(sort -t: -k1,1)",
+      "Bash(flutter --version)",
+      "Bash(flutter create:*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter run:*)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill:*)",
+      "Bash(npx vite:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
