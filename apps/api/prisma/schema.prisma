@@ -262,115 +262,115 @@ model Tenant {
   nombre    String
   plan      String   @default("standard")
   activo    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
-  usuarios                User[]
-  clientes                Cliente[]
-  tratamientos            Tratamiento[]
-  activos                 Activo[]
-  riesgos                 Riesgo[]
-  controles               Control[]
-  medidas                 Medida[]
-  hallazgos               Hallazgo[]
-  evidencias              Evidencia[]
-  documentos              Documento[]
-  firmas                  Firma[]
-  solicitudesFirma        SolicitudFirma[]
-  incidentes              Incidente[]
-  auditorias              Auditoria[]
-  revisionesTecnicas      RevisionTecnica[]
-  checklistRespuestas     ChecklistRespuesta[]
-  recomendaciones         Recomendacion[]
-  accionesCorrectivas     AccionCorrectiva[]
-  planesAccion            PlanAccion[]
-  brechas                 Brecha[]
-  diagnosticoRespuestas   DiagnosticoRespuesta[]
-  gobiernoItems           GobiernoItem[]
-  rolesSgpdp              RolSgpdp[]
-  recursosEvaluacion      RecursoEvaluacion[]
-  validacionesPrincipios  ValidacionPrincipio[]
-  principiosEstado        PrincipioEstado[]
-  categoriaDatosTenant    CategoriaDatosTenant[]
-  evaluacionesEipd        EvaluacionEipd[]
-  procesos                Proceso[]
-  solicitudesArco         SolicitudArco[]
-  kpiSnapshots            KpiSnapshot[]
-  madurezSnapshots        MadurezSnapshot[]
-  lecciones               Leccion[]
-  oportunidadesMejora     OportunidadMejora[]
-  inscripciones           Inscripcion[]
-  evaluacionesCap         Evaluacion[]
-  certificados            Certificado[]
-  pimsRespuestas          PimsRespuesta[]
-  solicitudesRegistro     SolicitudRegistro[]
-  auditLogs               AuditLog[]
-  agenteConversaciones    AgenteConversacion[]
-  agenteActividad         AgenteActividad[]
-  normaFavoritas          NormaFavorita[]
-  normaVistas             NormaVista[]
+  usuarios               User[]
+  clientes               Cliente[]
+  tratamientos           Tratamiento[]
+  activos                Activo[]
+  riesgos                Riesgo[]
+  controles              Control[]
+  medidas                Medida[]
+  hallazgos              Hallazgo[]
+  evidencias             Evidencia[]
+  documentos             Documento[]
+  firmas                 Firma[]
+  solicitudesFirma       SolicitudFirma[]
+  incidentes             Incidente[]
+  auditorias             Auditoria[]
+  revisionesTecnicas     RevisionTecnica[]
+  checklistRespuestas    ChecklistRespuesta[]
+  recomendaciones        Recomendacion[]
+  accionesCorrectivas    AccionCorrectiva[]
+  planesAccion           PlanAccion[]
+  brechas                Brecha[]
+  diagnosticoRespuestas  DiagnosticoRespuesta[]
+  gobiernoItems          GobiernoItem[]
+  rolesSgpdp             RolSgpdp[]
+  recursosEvaluacion     RecursoEvaluacion[]
+  validacionesPrincipios ValidacionPrincipio[]
+  principiosEstado       PrincipioEstado[]
+  categoriaDatosTenant   CategoriaDatosTenant[]
+  evaluacionesEipd       EvaluacionEipd[]
+  procesos               Proceso[]
+  solicitudesArco        SolicitudArco[]
+  kpiSnapshots           KpiSnapshot[]
+  madurezSnapshots       MadurezSnapshot[]
+  lecciones              Leccion[]
+  oportunidadesMejora    OportunidadMejora[]
+  inscripciones          Inscripcion[]
+  evaluacionesCap        Evaluacion[]
+  certificados           Certificado[]
+  pimsRespuestas         PimsRespuesta[]
+  solicitudesRegistro    SolicitudRegistro[]
+  auditLogs              AuditLog[]
+  agenteConversaciones   AgenteConversacion[]
+  agenteActividad        AgenteActividad[]
+  normaFavoritas         NormaFavorita[]
+  normaVistas            NormaVista[]
 
   @@map("tenants")
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
-  tenantId      String    @db.Uuid
-  email         String    @unique
-  nombre        String
-  rol           Rol
-  passwordHash  String
-  mfaSecret     String?
-  mfaEnabled    Boolean   @default(false)
-  ultimoAcceso  DateTime?
-  activo        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(uuid()) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  email        String    @unique
+  nombre       String
+  rol          Rol
+  passwordHash String    @map("password_hash")
+  mfaSecret    String?   @map("mfa_secret")
+  mfaEnabled   Boolean   @default(false) @map("mfa_enabled")
+  ultimoAcceso DateTime? @map("ultimo_acceso")
+  activo       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  tenant                Tenant              @relation(fields: [tenantId], references: [id])
-  evidenciasCargadas    Evidencia[]         @relation("creadoPor")
-  auditLogs             AuditLog[]          @relation("actor")
-  firmas                Firma[]
-  normaFavoritas        NormaFavorita[]
-  normaVistas           NormaVista[]
-  agenteConversaciones  AgenteConversacion[]
+  tenant               Tenant               @relation(fields: [tenantId], references: [id])
+  evidenciasCargadas   Evidencia[]          @relation("creadoPor")
+  auditLogs            AuditLog[]           @relation("actor")
+  firmas               Firma[]
+  normaFavoritas       NormaFavorita[]
+  normaVistas          NormaVista[]
+  agenteConversaciones AgenteConversacion[]
 
   @@index([tenantId])
   @@map("usuarios")
 }
 
 model Cliente {
-  id                        String      @id @default(uuid()) @db.Uuid
-  tenantId                  String      @db.Uuid
-  razonSocial               String
-  ruc                       String      @unique @db.VarChar(13)
-  actividadEconomica        String?
-  sector                    String?
-  representanteLegal        String?
-  cedulaRepresentante       String?     @db.VarChar(10)
-  direccion                 String?
-  ciudad                    String?
-  provincia                 String?
-  telefono                  String?
-  email                     String?
-  sitioWeb                  String?
-  empleados                 String?
-  transferenciaInternacional Boolean    @default(false)
-  paisesDestino             String[]
-  encargadoExterno          Boolean     @default(false)
-  nombreEncargado           String?
-  trataDatosSensibles       Boolean     @default(false)
-  tiposDatosSensibles       String[]
-  decisionesAutomatizadas   Boolean     @default(false)
-  perfilamiento             Boolean     @default(false)
-  videovigilancia           Boolean     @default(false)
-  menoresEdad               Boolean     @default(false)
-  dpiaRealizada             Boolean     @default(false)
-  brechaPreviaReportada     Boolean     @default(false)
-  fechaFormulario           DateTime?
-  nivelRiesgo               NivelRiesgo?
-  pdScore                   Int?
-  createdAt                 DateTime    @default(now())
-  updatedAt                 DateTime    @updatedAt
+  id                         String       @id @default(uuid()) @db.Uuid
+  tenantId                   String       @map("tenant_id") @db.Uuid
+  razonSocial                String       @map("razon_social")
+  ruc                        String       @unique @db.VarChar(13)
+  actividadEconomica         String?      @map("actividad_economica")
+  sector                     String?
+  representanteLegal         String?      @map("representante_legal")
+  cedulaRepresentante        String?      @map("cedula_representante") @db.VarChar(10)
+  direccion                  String?
+  ciudad                     String?
+  provincia                  String?
+  telefono                   String?
+  email                      String?
+  sitioWeb                   String?      @map("sitio_web")
+  empleados                  String?
+  transferenciaInternacional Boolean      @default(false) @map("transferencia_internacional")
+  paisesDestino              String[]     @map("paises_destino")
+  encargadoExterno           Boolean      @default(false) @map("encargado_externo")
+  nombreEncargado            String?      @map("nombre_encargado")
+  trataDatosSensibles        Boolean      @default(false) @map("trata_datos_sensibles")
+  tiposDatosSensibles        String[]     @map("tipos_datos_sensibles")
+  decisionesAutomatizadas    Boolean      @default(false) @map("decisiones_automatizadas")
+  perfilamiento              Boolean      @default(false)
+  videovigilancia            Boolean      @default(false)
+  menoresEdad                Boolean      @default(false) @map("menores_edad")
+  dpiaRealizada              Boolean      @default(false) @map("dpia_realizada")
+  brechaPreviaReportada      Boolean      @default(false) @map("brecha_previa_reportada")
+  fechaFormulario            DateTime?    @map("fecha_formulario")
+  nivelRiesgo                NivelRiesgo? @map("nivel_riesgo")
+  pdScore                    Int?         @map("pd_score")
+  createdAt                  DateTime     @default(now()) @map("created_at")
+  updatedAt                  DateTime     @updatedAt @map("updated_at")
 
   tenant              Tenant              @relation(fields: [tenantId], references: [id])
   solicitudesRegistro SolicitudRegistro[]
@@ -384,24 +384,24 @@ model Cliente {
 // ════════════════════════════════════════════════════════════
 
 model Norma {
-  id                  String        @id @default(uuid()) @db.Uuid
-  codigo              String        @unique  // "LOPDP-ART-7", "ISO27001-6.1"
+  id                  String                       @id @default(uuid()) @db.Uuid
+  codigo              String                       @unique // "LOPDP-ART-7", "ISO27001-6.1"
   fuente              FuenteNorma
   tipo                TipoNorma
-  identificador       String        // "Art. 7", "§6.1"
+  identificador       String // "Art. 7", "§6.1"
   titulo              String
   categoria           String
-  resumenEjecutivo    String        @db.Text
-  textoNormativo      String        @db.Text
-  organismoEmisor     String
-  fechaEmision        DateTime
-  version             String        @default("1.0")
-  estado              EstadoNorma   @default(VIGENTE)
-  fasePHVA            FasePHVA
-  hashSha256          String
-  modulosRelacionados String[]
+  resumenEjecutivo    String                       @map("resumen_ejecutivo") @db.Text
+  textoNormativo      String                       @map("texto_normativo") @db.Text
+  organismoEmisor     String                       @map("organismo_emisor")
+  fechaEmision        DateTime                     @map("fecha_emision")
+  version             String                       @default("1.0")
+  estado              EstadoNorma                  @default(VIGENTE)
+  fasePHVA            FasePHVA                     @map("fase_phva")
+  hashSha256          String                       @map("hash_sha256")
+  modulosRelacionados String[]                     @map("modulos_relacionados")
   embedding           Unsupported("vector(1024)")?
-  createdAt           DateTime      @default(now())
+  createdAt           DateTime                     @default(now()) @map("created_at")
 
   controlesNormativos ControlNormativo[]
   hallazgos           Hallazgo[]
@@ -417,15 +417,15 @@ model Norma {
 
 model ControlNormativo {
   id                 String   @id @default(uuid()) @db.Uuid
-  normaId            String   @db.Uuid
+  normaId            String   @map("norma_id") @db.Uuid
   titulo             String
   descripcion        String   @db.Text
-  evidenciaRequerida String
-  fasePHVA           FasePHVA
-  hashSha256         String
-  createdAt          DateTime @default(now())
+  evidenciaRequerida String   @map("evidencia_requerida")
+  fasePHVA           FasePHVA @map("fase_phva")
+  hashSha256         String   @map("hash_sha256")
+  createdAt          DateTime @default(now()) @map("created_at")
 
-  norma        Norma        @relation(fields: [normaId], references: [id])
+  norma        Norma         @relation(fields: [normaId], references: [id])
   corpusChunks CorpusChunk[]
 
   @@map("controles_normativos")
@@ -434,7 +434,7 @@ model ControlNormativo {
 model PrincipioRector {
   id            String @id @default(uuid()) @db.Uuid
   nombre        String @unique
-  baseNormativa String
+  baseNormativa String @map("base_normativa")
   definicion    String @db.Text
   orden         Int
 
@@ -446,7 +446,7 @@ model PrincipioRector {
 
 model PrincipioPreguntaAuditoria {
   id          String @id @default(uuid()) @db.Uuid
-  principioId String @db.Uuid
+  principioId String @map("principio_id") @db.Uuid
   orden       Int
   pregunta    String @db.Text
 
@@ -456,14 +456,14 @@ model PrincipioPreguntaAuditoria {
 }
 
 model PrincipioEstado {
-  id               String          @id @default(uuid()) @db.Uuid
-  tenantId         String          @db.Uuid
-  principioId      String          @db.Uuid
-  estado           EstadoPrincipio @default(PENDIENTE)
-  verificadoAt     DateTime?
-  verificadoPor    String?         @db.Uuid
-  hashEvidencia    String?
-  createdAt        DateTime        @default(now())
+  id            String          @id @default(uuid()) @db.Uuid
+  tenantId      String          @map("tenant_id") @db.Uuid
+  principioId   String          @map("principio_id") @db.Uuid
+  estado        EstadoPrincipio @default(PENDIENTE)
+  verificadoAt  DateTime?       @map("verificado_at")
+  verificadoPor String?         @map("verificado_por") @db.Uuid
+  hashEvidencia String?         @map("hash_evidencia")
+  createdAt     DateTime        @default(now()) @map("created_at")
 
   tenant    Tenant          @relation(fields: [tenantId], references: [id])
   principio PrincipioRector @relation(fields: [principioId], references: [id])
@@ -474,9 +474,9 @@ model PrincipioEstado {
 
 model NormaFavorita {
   id        String @id @default(uuid()) @db.Uuid
-  tenantId  String @db.Uuid
-  usuarioId String @db.Uuid
-  normaId   String @db.Uuid
+  tenantId  String @map("tenant_id") @db.Uuid
+  usuarioId String @map("usuario_id") @db.Uuid
+  normaId   String @map("norma_id") @db.Uuid
 
   tenant  Tenant @relation(fields: [tenantId], references: [id])
   usuario User   @relation(fields: [usuarioId], references: [id])
@@ -488,10 +488,10 @@ model NormaFavorita {
 
 model NormaVista {
   id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @db.Uuid
-  usuarioId String   @db.Uuid
-  normaId   String   @db.Uuid
-  vistoAt   DateTime @default(now())
+  tenantId  String   @map("tenant_id") @db.Uuid
+  usuarioId String   @map("usuario_id") @db.Uuid
+  normaId   String   @map("norma_id") @db.Uuid
+  vistoAt   DateTime @default(now()) @map("visto_at")
 
   tenant  Tenant @relation(fields: [tenantId], references: [id])
   usuario User   @relation(fields: [usuarioId], references: [id])
@@ -506,15 +506,15 @@ model NormaVista {
 
 model Proceso {
   id       String  @id @default(uuid()) @db.Uuid
-  tenantId String  @db.Uuid
-  parentId String? @db.Uuid
+  tenantId String  @map("tenant_id") @db.Uuid
+  parentId String? @map("parent_id") @db.Uuid
   nombre   String
-  nivel    String  // macroproceso, proceso, subproceso
+  nivel    String // macroproceso, proceso, subproceso
   estado   String  @default("PENDIENTE") // IMPLEMENTADO, EN_PROGRESO, PENDIENTE
 
-  tenant Tenant    @relation(fields: [tenantId], references: [id])
-  parent Proceso?  @relation("procesoHijos", fields: [parentId], references: [id])
-  hijos  Proceso[] @relation("procesoHijos")
+  tenant Tenant         @relation(fields: [tenantId], references: [id])
+  parent Proceso?       @relation("procesoHijos", fields: [parentId], references: [id])
+  hijos  Proceso[]      @relation("procesoHijos")
   normas ProcesoNorma[]
 
   @@index([tenantId])
@@ -523,8 +523,8 @@ model Proceso {
 
 model ProcesoNorma {
   id        String @id @default(uuid()) @db.Uuid
-  procesoId String @db.Uuid
-  normaId   String @db.Uuid
+  procesoId String @map("proceso_id") @db.Uuid
+  normaId   String @map("norma_id") @db.Uuid
 
   proceso Proceso @relation(fields: [procesoId], references: [id])
   norma   Norma   @relation(fields: [normaId], references: [id])
@@ -535,29 +535,29 @@ model ProcesoNorma {
 
 model Tratamiento {
   id               String            @id @default(uuid()) @db.Uuid
-  tenantId         String            @db.Uuid
-  codigoRat        String
+  tenantId         String            @map("tenant_id") @db.Uuid
+  codigoRat        String            @map("codigo_rat")
   nombre           String
   finalidad        String
-  baseLegal        String?
+  baseLegal        String?           @map("base_legal")
   categorias       String[]
-  datosSensibles   Boolean           @default(false)
+  datosSensibles   Boolean           @default(false) @map("datos_sensibles")
   retencion        String?
   area             String?
   estado           EstadoTratamiento @default(PENDIENTE)
-  observacionesDpo String?           @db.Text
-  validadoPor      String?           @db.Uuid
-  validadoAt       DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  observacionesDpo String?           @map("observaciones_dpo") @db.Text
+  validadoPor      String?           @map("validado_por") @db.Uuid
+  validadoAt       DateTime?         @map("validado_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
 
-  tenant              Tenant               @relation(fields: [tenantId], references: [id])
-  riesgos             Riesgo[]
-  evaluacionesEipd    EvaluacionEipd[]
-  incidentes          Incidente[]
-  activos             TratamientoActivo[]
-  validacionesPrinc   ValidacionPrincipio[]
-  solicitudesArco     SolicitudArco[]
+  tenant            Tenant                @relation(fields: [tenantId], references: [id])
+  riesgos           Riesgo[]
+  evaluacionesEipd  EvaluacionEipd[]
+  incidentes        Incidente[]
+  activos           TratamientoActivo[]
+  validacionesPrinc ValidacionPrincipio[]
+  solicitudesArco   SolicitudArco[]
 
   @@unique([tenantId, codigoRat])
   @@index([tenantId])
@@ -565,17 +565,17 @@ model Tratamiento {
 }
 
 model Activo {
-  id                    String          @id @default(uuid()) @db.Uuid
-  tenantId              String          @db.Uuid
-  nombre                String
-  tipo                  String
-  criticidad            CriticidadActivo
-  responsable           String
-  ubicacion             String
-  sistemas              String[]
-  contienePersonales    Boolean         @default(true)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  id                 String           @id @default(uuid()) @db.Uuid
+  tenantId           String           @map("tenant_id") @db.Uuid
+  nombre             String
+  tipo               String
+  criticidad         CriticidadActivo
+  responsable        String
+  ubicacion          String
+  sistemas           String[]
+  contienePersonales Boolean          @default(true) @map("contiene_personales")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
 
   tenant       Tenant              @relation(fields: [tenantId], references: [id])
   riesgos      Riesgo[]
@@ -587,9 +587,9 @@ model Activo {
 }
 
 model TratamientoActivo {
-  id             String @id @default(uuid()) @db.Uuid
-  tratamientoId  String @db.Uuid
-  activoId       String @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
+  tratamientoId String @map("tratamiento_id") @db.Uuid
+  activoId      String @map("activo_id") @db.Uuid
 
   tratamiento Tratamiento @relation(fields: [tratamientoId], references: [id])
   activo      Activo      @relation(fields: [activoId], references: [id])
@@ -599,9 +599,9 @@ model TratamientoActivo {
 }
 
 model CategoriaDatos {
-  id            String           @id @default(uuid()) @db.Uuid
-  nombre        String           @unique
-  baseNormativa String
+  id            String              @id @default(uuid()) @db.Uuid
+  nombre        String              @unique
+  baseNormativa String              @map("base_normativa")
   nivel         NivelCategoriaDatos
   descripcion   String?
 
@@ -612,8 +612,8 @@ model CategoriaDatos {
 
 model CategoriaDatosTenant {
   id          String  @id @default(uuid()) @db.Uuid
-  tenantId    String  @db.Uuid
-  categoriaId String  @db.Uuid
+  tenantId    String  @map("tenant_id") @db.Uuid
+  categoriaId String  @map("categoria_id") @db.Uuid
   activa      Boolean @default(false)
 
   tenant    Tenant         @relation(fields: [tenantId], references: [id])
@@ -628,7 +628,7 @@ model Amenaza {
   familia          String
   nombre           String
   descripcion      String @db.Text
-  probabilidadBase Int    @db.SmallInt // 1..5
+  probabilidadBase Int    @map("probabilidad_base") @db.SmallInt // 1..5
 
   vulnerabilidades Vulnerabilidad[]
   riesgos          Riesgo[]
@@ -638,7 +638,7 @@ model Amenaza {
 
 model Vulnerabilidad {
   id        String @id @default(uuid()) @db.Uuid
-  amenazaId String @db.Uuid
+  amenazaId String @map("amenaza_id") @db.Uuid
   nombre    String
 
   amenaza Amenaza @relation(fields: [amenazaId], references: [id])
@@ -647,23 +647,23 @@ model Vulnerabilidad {
 }
 
 model Riesgo {
-  id                 String       @id @default(uuid()) @db.Uuid
-  tenantId           String       @db.Uuid
-  tratamientoId      String       @db.Uuid
-  activoId           String       @db.Uuid
-  amenazaId          String?      @db.Uuid
-  vulnerabilidadTexto String?
-  impacto            Int          @db.SmallInt
-  probabilidad       Int          @db.SmallInt
-  score              Int          @db.SmallInt  // impacto * probabilidad
-  nivel              NivelRiesgo
-  estado             EstadoRiesgo @default(IDENTIFICADO)
-  requiereEipd       Boolean      @default(false)
-  revisadoDpo        Boolean      @default(false)
-  revisadoAt         DateTime?
-  riesgoResidual     Int?         @db.SmallInt
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                  String       @id @default(uuid()) @db.Uuid
+  tenantId            String       @map("tenant_id") @db.Uuid
+  tratamientoId       String       @map("tratamiento_id") @db.Uuid
+  activoId            String       @map("activo_id") @db.Uuid
+  amenazaId           String?      @map("amenaza_id") @db.Uuid
+  vulnerabilidadTexto String?      @map("vulnerabilidad_texto")
+  impacto             Int          @db.SmallInt
+  probabilidad        Int          @db.SmallInt
+  score               Int          @db.SmallInt // impacto * probabilidad
+  nivel               NivelRiesgo
+  estado              EstadoRiesgo @default(IDENTIFICADO)
+  requiereEipd        Boolean      @default(false) @map("requiere_eipd")
+  revisadoDpo         Boolean      @default(false) @map("revisado_dpo")
+  revisadoAt          DateTime?    @map("revisado_at")
+  riesgoResidual      Int?         @map("riesgo_residual") @db.SmallInt
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
 
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
   tratamiento Tratamiento @relation(fields: [tratamientoId], references: [id])
@@ -677,21 +677,21 @@ model Riesgo {
 
 model EvaluacionEipd {
   id                 String   @id @default(uuid()) @db.Uuid
-  tenantId           String   @db.Uuid
-  tratamientoId      String   @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  tratamientoId      String   @map("tratamiento_id") @db.Uuid
   tipo               String   @default("EIPD") // EIPD | LIA
-  granEscala         Boolean  @default(false)
+  granEscala         Boolean  @default(false) @map("gran_escala")
   sensibles          Boolean  @default(false)
-  decisionesAuto     Boolean  @default(false)
+  decisionesAuto     Boolean  @default(false) @map("decisiones_auto")
   perfilamiento      Boolean  @default(false)
   menores            Boolean  @default(false)
-  puntajeMtge        Int?     @db.SmallInt
+  puntajeMtge        Int?     @map("puntaje_mtge") @db.SmallInt
   decision           String   @default("OBLIGATORIO") // OBLIGATORIO | NO_OBLIGATORIO
   estado             String   @default("Pendiente")
-  informeDocumentoId String?  @db.Uuid
-  firmadoPor         String?  @db.Uuid
-  hashSha256         String?
-  createdAt          DateTime @default(now())
+  informeDocumentoId String?  @map("informe_documento_id") @db.Uuid
+  firmadoPor         String?  @map("firmado_por") @db.Uuid
+  hashSha256         String?  @map("hash_sha256")
+  createdAt          DateTime @default(now()) @map("created_at")
 
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
   tratamiento Tratamiento @relation(fields: [tratamientoId], references: [id])
@@ -716,12 +716,12 @@ model DiagnosticoDimension {
 
 model DiagnosticoPregunta {
   id            String  @id @default(uuid()) @db.Uuid
-  dimensionId   String  @db.Uuid
+  dimensionId   String  @map("dimension_id") @db.Uuid
   orden         Int
   enunciado     String  @db.Text
-  baseNormativa String
-  creadaPorDpo  Boolean @default(false)
-  tenantId      String? @db.Uuid  // null = global, set = DPO custom
+  baseNormativa String  @map("base_normativa")
+  creadaPorDpo  Boolean @default(false) @map("creada_por_dpo")
+  tenantId      String? @map("tenant_id") @db.Uuid // null = global, set = DPO custom
 
   dimension  DiagnosticoDimension   @relation(fields: [dimensionId], references: [id])
   respuestas DiagnosticoRespuesta[]
@@ -731,11 +731,11 @@ model DiagnosticoPregunta {
 
 model DiagnosticoRespuesta {
   id            String               @id @default(uuid()) @db.Uuid
-  tenantId      String               @db.Uuid
-  preguntaId    String               @db.Uuid
+  tenantId      String               @map("tenant_id") @db.Uuid
+  preguntaId    String               @map("pregunta_id") @db.Uuid
   respuesta     RespuestaDiagnostico
-  respondidoPor String?              @db.Uuid
-  respondidoAt  DateTime?
+  respondidoPor String?              @map("respondido_por") @db.Uuid
+  respondidoAt  DateTime?            @map("respondido_at")
 
   tenant   Tenant              @relation(fields: [tenantId], references: [id])
   pregunta DiagnosticoPregunta @relation(fields: [preguntaId], references: [id])
@@ -746,13 +746,13 @@ model DiagnosticoRespuesta {
 }
 
 model GobiernoItem {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @db.Uuid
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
   nombre        String
-  baseNormativa String
-  verificado    Boolean  @default(false)
-  evidenciaId   String?  @db.Uuid
-  verificadoAt  DateTime?
+  baseNormativa String    @map("base_normativa")
+  verificado    Boolean   @default(false)
+  evidenciaId   String?   @map("evidencia_id") @db.Uuid
+  verificadoAt  DateTime? @map("verificado_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -762,16 +762,16 @@ model GobiernoItem {
 
 model RolSgpdp {
   id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
   nombre          String
   descripcion     String?   @db.Text
-  baseNormativa   String
-  requiereActa    Boolean   @default(false)
+  baseNormativa   String    @map("base_normativa")
+  requiereActa    Boolean   @default(false) @map("requiere_acta")
   estado          EstadoRol @default(NO_DEFINIDO)
-  hashActa        String?
-  actaDocumentoId String?   @db.Uuid
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  hashActa        String?   @map("hash_acta")
+  actaDocumentoId String?   @map("acta_documento_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -780,12 +780,12 @@ model RolSgpdp {
 }
 
 model RecursoEvaluacion {
-  id            String        @id @default(uuid()) @db.Uuid
-  tenantId      String        @db.Uuid
-  categoria     String
-  items         String[]
-  estado        EstadoRecurso @default(NO_EVALUADO)
-  observacionDpo String?
+  id             String        @id @default(uuid()) @db.Uuid
+  tenantId       String        @map("tenant_id") @db.Uuid
+  categoria      String
+  items          String[]
+  estado         EstadoRecurso @default(NO_EVALUADO)
+  observacionDpo String?       @map("observacion_dpo")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -795,15 +795,15 @@ model RecursoEvaluacion {
 
 model Brecha {
   id          String   @id @default(uuid()) @db.Uuid
-  tenantId    String   @db.Uuid
-  codigo      String   // GAP-SIS-0xx
+  tenantId    String   @map("tenant_id") @db.Uuid
+  codigo      String // GAP-SIS-0xx
   origen      String   @default("SISTEMA") // WIZARD | SISTEMA
-  severidad   String   // CRITICA | ALTA | MEDIA | BAJA
+  severidad   String // CRITICA | ALTA | MEDIA | BAJA
   descripcion String   @db.Text
   dominio     String
-  faseOrigen  String?
+  faseOrigen  String?  @map("fase_origen")
   estado      String   @default("ABIERTA")
-  detectadaAt DateTime @default(now())
+  detectadaAt DateTime @default(now()) @map("detectada_at")
 
   tenant       Tenant       @relation(fields: [tenantId], references: [id])
   planesAccion PlanAccion[]
@@ -814,24 +814,24 @@ model Brecha {
 
 model Control {
   id                 String        @id @default(uuid()) @db.Uuid
-  tenantId           String        @db.Uuid
+  tenantId           String        @map("tenant_id") @db.Uuid
   tipo               TipoControl
   categoria          String?
   titulo             String
   descripcion        String?       @db.Text
-  baseNormativa      String
-  normaId            String?       @db.Uuid
+  baseNormativa      String        @map("base_normativa")
+  normaId            String?       @map("norma_id") @db.Uuid
   estado             EstadoControl @default(PROPUESTA)
   prioridad          String?
   plazo              DateTime?
   responsable        String?
   suficiencia        Suficiencia   @default(NO_EVALUADA)
   eficacia           Eficacia      @default(NO_EVALUADA)
-  confianzaEvidencia Confianza     @default(NO_EVALUADA)
-  calificadoPor      String?       @db.Uuid
-  calificadoAt       DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  confianzaEvidencia Confianza     @default(NO_EVALUADA) @map("confianza_evidencia")
+  calificadoPor      String?       @map("calificado_por") @db.Uuid
+  calificadoAt       DateTime?     @map("calificado_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   tenant     Tenant      @relation(fields: [tenantId], references: [id])
   norma      Norma?      @relation(fields: [normaId], references: [id])
@@ -842,18 +842,18 @@ model Control {
 }
 
 model Medida {
-  id            String @id @default(uuid()) @db.Uuid
-  tenantId      String @db.Uuid
+  id            String      @id @default(uuid()) @db.Uuid
+  tenantId      String      @map("tenant_id") @db.Uuid
   tipo          TipoControl
   subtipo       String?
   titulo        String
-  descripcion   String?       @db.Text
-  baseNormativa String
+  descripcion   String?     @db.Text
+  baseNormativa String      @map("base_normativa")
   responsable   String?
-  estado        String        @default("PENDIENTE")
-  contraparte   String?       // e.g. "Amazon Web Services"
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  estado        String      @default("PENDIENTE")
+  contraparte   String? // e.g. "Amazon Web Services"
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -862,14 +862,14 @@ model Medida {
 }
 
 model ValidacionPrincipio {
-  id             String   @id @default(uuid()) @db.Uuid
-  tenantId       String   @db.Uuid
-  tratamientoId  String   @db.Uuid
-  veredicto      String   // VALIDO | INCONSISTENCIA | BLOQUEADO
-  motivo         String?  @db.Text
-  validadoPor    String?  @db.Uuid
-  validadoAt     DateTime?
-  createdAt      DateTime @default(now())
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  tratamientoId String    @map("tratamiento_id") @db.Uuid
+  veredicto     String // VALIDO | INCONSISTENCIA | BLOQUEADO
+  motivo        String?   @db.Text
+  validadoPor   String?   @map("validado_por") @db.Uuid
+  validadoAt    DateTime? @map("validado_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
   tratamiento Tratamiento @relation(fields: [tratamientoId], references: [id])
@@ -879,22 +879,22 @@ model ValidacionPrincipio {
 }
 
 model PlanAccion {
-  id            String          @id @default(uuid()) @db.Uuid
-  tenantId      String          @db.Uuid
-  titulo        String
-  brechaRef     String?
-  hallazgoId    String?         @db.Uuid
-  brechaId      String?         @db.Uuid
-  responsable   String
-  plazo         DateTime
-  estado        EstadoPlanAccion @default(COMPROMETIDO)
-  hashCierre    String?
-  cerradoAt     DateTime?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String           @id @default(uuid()) @db.Uuid
+  tenantId    String           @map("tenant_id") @db.Uuid
+  titulo      String
+  brechaRef   String?          @map("brecha_ref")
+  hallazgoId  String?          @map("hallazgo_id") @db.Uuid
+  brechaId    String?          @map("brecha_id") @db.Uuid
+  responsable String
+  plazo       DateTime
+  estado      EstadoPlanAccion @default(COMPROMETIDO)
+  hashCierre  String?          @map("hash_cierre")
+  cerradoAt   DateTime?        @map("cerrado_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
-  brecha  Brecha? @relation(fields: [brechaId], references: [id])
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
+  brecha Brecha? @relation(fields: [brechaId], references: [id])
 
   @@index([tenantId])
   @@map("planes_accion")
@@ -905,29 +905,29 @@ model PlanAccion {
 // ════════════════════════════════════════════════════════════
 
 model Evidencia {
-  id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @db.Uuid
-  nombre          String
-  tipoDocumento   String
-  formato         String?
-  dimensionId     String?  @db.Uuid
-  controlId       String?  @db.Uuid
-  fase            Int?     @db.SmallInt
-  storageKey      String
-  mime            String?
-  sizeBytes       Int
-  hashSha256      String
-  prevHash        String?
-  chainIndex      Int      @default(0)
-  cargadoPorId    String   @db.Uuid
-  cargadoPorArea  String?
-  retencionHasta  DateTime // created_at + 5 años (INV-3)
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  nombre         String
+  tipoDocumento  String   @map("tipo_documento")
+  formato        String?
+  dimensionId    String?  @map("dimension_id") @db.Uuid
+  controlId      String?  @map("control_id") @db.Uuid
+  fase           Int?     @db.SmallInt
+  storageKey     String   @map("storage_key")
+  mime           String?
+  sizeBytes      Int      @map("size_bytes")
+  hashSha256     String   @map("hash_sha256")
+  prevHash       String?  @map("prev_hash")
+  chainIndex     Int      @default(0) @map("chain_index")
+  cargadoPorId   String   @map("cargado_por_id") @db.Uuid
+  cargadoPorArea String?  @map("cargado_por_area")
+  retencionHasta DateTime @map("retencion_hasta") // created_at + 5 años (INV-3)
+  createdAt      DateTime @default(now()) @map("created_at")
   // APPEND ONLY — no updatedAt (INV-3)
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  cargadoPor User    @relation("creadoPor", fields: [cargadoPorId], references: [id])
-  control   Control? @relation("controlEvidencias", fields: [controlId], references: [id])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  cargadoPor User     @relation("creadoPor", fields: [cargadoPorId], references: [id])
+  control    Control? @relation("controlEvidencias", fields: [controlId], references: [id])
 
   @@index([tenantId])
   @@index([hashSha256])
@@ -935,23 +935,23 @@ model Evidencia {
 }
 
 model Documento {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @db.Uuid
-  tipo            String
-  titulo          String
-  version         String    @default("1.0")
-  estado          String    @default("PENDIENTE") // PENDIENTE|GENERAR|BORRADOR|APROBAR|APROBADO
-  contenidoMd     String?   @db.Text
-  pdfStorageKey   String?
-  hashSha256      String?
-  generadoPor     ActorType @default(SISTEMA)
-  aprobadoPor     String?   @db.Uuid
-  aprobadoAt      DateTime?
-  firmaId         String?   @db.Uuid
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  tipo          String
+  titulo        String
+  version       String    @default("1.0")
+  estado        String    @default("PENDIENTE") // PENDIENTE|GENERAR|BORRADOR|APROBAR|APROBADO
+  contenidoMd   String?   @map("contenido_md") @db.Text
+  pdfStorageKey String?   @map("pdf_storage_key")
+  hashSha256    String?   @map("hash_sha256")
+  generadoPor   ActorType @default(SISTEMA) @map("generado_por")
+  aprobadoPor   String?   @map("aprobado_por") @db.Uuid
+  aprobadoAt    DateTime? @map("aprobado_at")
+  firmaId       String?   @map("firma_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
   firmas Firma[]
 
   @@index([tenantId])
@@ -959,16 +959,16 @@ model Documento {
 }
 
 model Firma {
-  id                 String   @id @default(uuid()) @db.Uuid
-  tenantId           String   @db.Uuid
-  documentoId        String   @db.Uuid
-  usuarioId          String   @db.Uuid
-  metodo             String   // PIN | BIOMETRIA | CERT_DIGITAL
-  declaracionJurada  Boolean  @default(false)
-  ip                 String?
-  userAgent          String?
-  hashFirma          String
-  firmadoAt          DateTime @default(now())
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  documentoId       String   @map("documento_id") @db.Uuid
+  usuarioId         String   @map("usuario_id") @db.Uuid
+  metodo            String // PIN | BIOMETRIA | CERT_DIGITAL
+  declaracionJurada Boolean  @default(false) @map("declaracion_jurada")
+  ip                String?
+  userAgent         String?  @map("user_agent")
+  hashFirma         String   @map("hash_firma")
+  firmadoAt         DateTime @default(now()) @map("firmado_at")
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id])
   documento Documento @relation(fields: [documentoId], references: [id])
@@ -979,17 +979,17 @@ model Firma {
 }
 
 model SolicitudFirma {
-  id         String    @id @default(uuid()) @db.Uuid
-  tenantId   String    @db.Uuid
-  tipo       String
-  entidad    String
-  entidadId  String    @db.Uuid
-  motivo     String    @db.Text
-  creadaPor  ActorType @default(MARK_AI)
-  estado     String    @default("PENDIENTE") // PENDIENTE | FIRMADA | RECHAZADA
-  resueltaPor String?  @db.Uuid
-  resueltaAt DateTime?
-  createdAt  DateTime  @default(now())
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  tipo        String
+  entidad     String
+  entidadId   String    @map("entidad_id") @db.Uuid
+  motivo      String    @db.Text
+  creadaPor   ActorType @default(MARK_AI) @map("creada_por")
+  estado      String    @default("PENDIENTE") // PENDIENTE | FIRMADA | RECHAZADA
+  resueltaPor String?   @map("resuelta_por") @db.Uuid
+  resueltaAt  DateTime? @map("resuelta_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -1003,18 +1003,18 @@ model SolicitudFirma {
 
 model Auditoria {
   id              String          @id @default(uuid()) @db.Uuid
-  tenantId        String          @db.Uuid
+  tenantId        String          @map("tenant_id") @db.Uuid
   codigo          String
   tipo            TipoAuditoria
   objetivo        String          @db.Text
   responsable     String
   fecha           DateTime
   estado          EstadoAuditoria @default(PROGRAMADA)
-  cumplimientoPct Int?            @db.SmallInt
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  cumplimientoPct Int?            @map("cumplimiento_pct") @db.SmallInt
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  tenant              Tenant              @relation(fields: [tenantId], references: [id])
+  tenant              Tenant               @relation(fields: [tenantId], references: [id])
   revisionesTecnicas  RevisionTecnica[]
   checklistRespuestas ChecklistRespuesta[]
   hallazgos           Hallazgo[]
@@ -1025,8 +1025,8 @@ model Auditoria {
 
 model RevisionTecnica {
   id          String   @id @default(uuid()) @db.Uuid
-  tenantId    String   @db.Uuid
-  auditoriaId String   @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  auditoriaId String   @map("auditoria_id") @db.Uuid
   descripcion String   @db.Text
   resultado   String
   fecha       DateTime
@@ -1043,7 +1043,7 @@ model ChecklistItem {
   perfil        PerfilChecklist
   orden         Int
   pregunta      String          @db.Text
-  baseNormativa String
+  baseNormativa String          @map("base_normativa")
 
   respuestas ChecklistRespuesta[]
 
@@ -1051,44 +1051,44 @@ model ChecklistItem {
 }
 
 model ChecklistRespuesta {
-  id          String             @id @default(uuid()) @db.Uuid
-  tenantId    String             @db.Uuid
-  auditoriaId String?            @db.Uuid
-  itemId      String             @db.Uuid
-  respuesta   RespuestaChecklist
-  evidenciaId String?            @db.Uuid
-  respondidoAt DateTime         @default(now())
+  id           String             @id @default(uuid()) @db.Uuid
+  tenantId     String             @map("tenant_id") @db.Uuid
+  auditoriaId  String?            @map("auditoria_id") @db.Uuid
+  itemId       String             @map("item_id") @db.Uuid
+  respuesta    RespuestaChecklist
+  evidenciaId  String?            @map("evidencia_id") @db.Uuid
+  respondidoAt DateTime           @default(now()) @map("respondido_at")
 
-  tenant    Tenant         @relation(fields: [tenantId], references: [id])
-  auditoria Auditoria?     @relation(fields: [auditoriaId], references: [id])
-  item      ChecklistItem  @relation(fields: [itemId], references: [id])
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
+  auditoria Auditoria?    @relation(fields: [auditoriaId], references: [id])
+  item      ChecklistItem @relation(fields: [itemId], references: [id])
 
   @@unique([tenantId, auditoriaId, itemId])
   @@map("checklist_respuestas")
 }
 
 model Hallazgo {
-  id                     String          @id @default(uuid()) @db.Uuid
-  tenantId               String          @db.Uuid
-  codigo                 String
-  tipo                   TipoHallazgo
-  severidad              SeveridadHallazgo
-  descripcion            String          @db.Text
-  normaId                String?         @db.Uuid     // RN-601: obligatorio
-  documentoAfectado      String?
-  faseOrigen             Int?            @db.SmallInt
-  auditoriaId            String?         @db.Uuid
-  estado                 EstadoHallazgo  @default(ABIERTO)
-  detectadoAt            DateTime        @default(now())
-  cerradoPor             String?         @db.Uuid
-  cerradoAt              DateTime?
-  hashEvidenciaCierre    String?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  id                  String            @id @default(uuid()) @db.Uuid
+  tenantId            String            @map("tenant_id") @db.Uuid
+  codigo              String
+  tipo                TipoHallazgo
+  severidad           SeveridadHallazgo
+  descripcion         String            @db.Text
+  normaId             String?           @map("norma_id") @db.Uuid // RN-601: obligatorio
+  documentoAfectado   String?           @map("documento_afectado")
+  faseOrigen          Int?              @map("fase_origen") @db.SmallInt
+  auditoriaId         String?           @map("auditoria_id") @db.Uuid
+  estado              EstadoHallazgo    @default(ABIERTO)
+  detectadoAt         DateTime          @default(now()) @map("detectado_at")
+  cerradoPor          String?           @map("cerrado_por") @db.Uuid
+  cerradoAt           DateTime?         @map("cerrado_at")
+  hashEvidenciaCierre String?           @map("hash_evidencia_cierre")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id])
-  norma     Norma?     @relation(fields: [normaId], references: [id])
-  auditoria Auditoria? @relation(fields: [auditoriaId], references: [id])
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  norma           Norma?          @relation(fields: [normaId], references: [id])
+  auditoria       Auditoria?      @relation(fields: [auditoriaId], references: [id])
   recomendaciones Recomendacion[]
 
   @@index([tenantId])
@@ -1097,21 +1097,21 @@ model Hallazgo {
 }
 
 model Incidente {
-  id                    String          @id @default(uuid()) @db.Uuid
-  tenantId              String          @db.Uuid
-  codigo                String
-  tipo                  TipoIncidente
-  tratamientoId         String?         @db.Uuid
-  activoId              String?         @db.Uuid
-  descripcion           String          @db.Text
-  fechaDeteccion        DateTime
-  fechaMaxReporte       DateTime        // fechaDeteccion + 72h (INV-9) — computed at app level
-  notificadoSpdp        Boolean         @default(false)
-  fechaNotificacion     DateTime?
-  titularesComunicados  Boolean         @default(false)
-  estado                EstadoIncidente @default(DETECTADO)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  id                   String          @id @default(uuid()) @db.Uuid
+  tenantId             String          @map("tenant_id") @db.Uuid
+  codigo               String
+  tipo                 TipoIncidente
+  tratamientoId        String?         @map("tratamiento_id") @db.Uuid
+  activoId             String?         @map("activo_id") @db.Uuid
+  descripcion          String          @db.Text
+  fechaDeteccion       DateTime        @map("fecha_deteccion")
+  fechaMaxReporte      DateTime        @map("fecha_max_reporte") // fechaDeteccion + 72h (INV-9) — computed at app level
+  notificadoSpdp       Boolean         @default(false) @map("notificado_spdp")
+  fechaNotificacion    DateTime?       @map("fecha_notificacion")
+  titularesComunicados Boolean         @default(false) @map("titulares_comunicados")
+  estado               EstadoIncidente @default(DETECTADO)
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id])
   tratamiento Tratamiento? @relation(fields: [tratamientoId], references: [id])
@@ -1123,17 +1123,17 @@ model Incidente {
 }
 
 model SolicitudArco {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @db.Uuid
-  tipo          String   // ACCESO|RECTIFICACION|CANCELACION|OPOSICION|PORTABILIDAD|NO_PERFILAMIENTO
-  titularRef    String
-  tratamientoId String?  @db.Uuid
-  recibidaAt    DateTime
-  plazoLimite   DateTime
-  respondidaAt  DateTime?
-  diasRespuesta Int?
-  estado        String   @default("RECIBIDA")
-  createdAt     DateTime @default(now())
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  tipo          String // ACCESO|RECTIFICACION|CANCELACION|OPOSICION|PORTABILIDAD|NO_PERFILAMIENTO
+  titularRef    String    @map("titular_ref")
+  tratamientoId String?   @map("tratamiento_id") @db.Uuid
+  recibidaAt    DateTime  @map("recibida_at")
+  plazoLimite   DateTime  @map("plazo_limite")
+  respondidaAt  DateTime? @map("respondida_at")
+  diasRespuesta Int?      @map("dias_respuesta")
+  estado        String    @default("RECIBIDA")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id])
   tratamiento Tratamiento? @relation(fields: [tratamientoId], references: [id])
@@ -1144,7 +1144,7 @@ model SolicitudArco {
 
 model KpiSnapshot {
   id       String   @id @default(uuid()) @db.Uuid
-  tenantId String   @db.Uuid
+  tenantId String   @map("tenant_id") @db.Uuid
   fecha    DateTime
   clave    String
   valor    Decimal  @db.Decimal(10, 2)
@@ -1158,7 +1158,7 @@ model KpiSnapshot {
 
 model MadurezSnapshot {
   id         String       @id @default(uuid()) @db.Uuid
-  tenantId   String       @db.Uuid
+  tenantId   String       @map("tenant_id") @db.Uuid
   fecha      DateTime
   fase       Int          @db.SmallInt
   porcentaje Int          @db.SmallInt
@@ -1177,7 +1177,7 @@ model MadurezSnapshot {
 
 model Recomendacion {
   id               String              @id @default(uuid()) @db.Uuid
-  tenantId         String              @db.Uuid
+  tenantId         String              @map("tenant_id") @db.Uuid
   codigo           String
   prioridad        String?
   dominio          String?
@@ -1186,15 +1186,15 @@ model Recomendacion {
   responsable      String
   plazo            DateTime
   estado           EstadoRecomendacion @default(EMITIDA)
-  origenHallazgoId String?             @db.Uuid
-  verificadoPor    String?             @db.Uuid
-  verificadoAt     DateTime?
-  hashEvidencia    String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  origenHallazgoId String?             @map("origen_hallazgo_id") @db.Uuid
+  verificadoPor    String?             @map("verificado_por") @db.Uuid
+  verificadoAt     DateTime?           @map("verificado_at")
+  hashEvidencia    String?             @map("hash_evidencia")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
 
-  tenant          Tenant    @relation(fields: [tenantId], references: [id])
-  origenHallazgo  Hallazgo? @relation(fields: [origenHallazgoId], references: [id])
+  tenant              Tenant             @relation(fields: [tenantId], references: [id])
+  origenHallazgo      Hallazgo?          @relation(fields: [origenHallazgoId], references: [id])
   accionesCorrectivas AccionCorrectiva[]
 
   @@index([tenantId])
@@ -1203,15 +1203,15 @@ model Recomendacion {
 
 model AccionCorrectiva {
   id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @db.Uuid
-  recomendacionId String   @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  recomendacionId String   @map("recomendacion_id") @db.Uuid
   descripcion     String   @db.Text
   responsable     String
   plazo           DateTime
   estado          String   @default("PENDIENTE")
-  evidenciaId     String?  @db.Uuid
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  evidenciaId     String?  @map("evidencia_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
   recomendacion Recomendacion @relation(fields: [recomendacionId], references: [id])
@@ -1222,8 +1222,8 @@ model AccionCorrectiva {
 
 model Leccion {
   id          String   @id @default(uuid()) @db.Uuid
-  tenantId    String   @db.Uuid
-  tipo        String   // HALLAZGO | BUENA_PRACTICA
+  tenantId    String   @map("tenant_id") @db.Uuid
+  tipo        String // HALLAZGO | BUENA_PRACTICA
   titulo      String
   descripcion String   @db.Text
   areas       String[]
@@ -1238,14 +1238,14 @@ model Leccion {
 
 model OportunidadMejora {
   id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
   tipo            String
-  impacto         String    // ALTO | BAJO
-  faseOrigen      String
+  impacto         String // ALTO | BAJO
+  faseOrigen      String    @map("fase_origen")
   diagnostico     String    @db.Text
-  accionPropuesta String    @db.Text
+  accionPropuesta String    @map("accion_propuesta") @db.Text
   aplicada        Boolean   @default(false)
-  aplicadaAt      DateTime?
+  aplicadaAt      DateTime? @map("aplicada_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -1262,11 +1262,11 @@ model Curso {
   codigo        String  @unique
   titulo        String
   descripcion   String  @db.Text
-  nivel         String  // BASICO | INTERMEDIO | AVANZADO
+  nivel         String // BASICO | INTERMEDIO | AVANZADO
   categoria     String
-  baseNormativa String
-  duracionMin   Int
-  numPreguntas  Int     @default(10)
+  baseNormativa String  @map("base_normativa")
+  duracionMin   Int     @map("duracion_min")
+  numPreguntas  Int     @default(10) @map("num_preguntas")
   activo        Boolean @default(true)
 
   preguntas     CursoPregunta[]
@@ -1277,12 +1277,12 @@ model Curso {
 }
 
 model CursoPregunta {
-  id          String @id @default(uuid()) @db.Uuid
-  cursoId     String @db.Uuid
+  id          String  @id @default(uuid()) @db.Uuid
+  cursoId     String  @map("curso_id") @db.Uuid
   orden       Int
-  enunciado   String @db.Text
-  opciones    Json   // [{text: string}]
-  correcta    Int    @db.SmallInt
+  enunciado   String  @db.Text
+  opciones    Json // [{text: string}]
+  correcta    Int     @db.SmallInt
   explicacion String? @db.Text
 
   curso Curso @relation(fields: [cursoId], references: [id])
@@ -1291,13 +1291,13 @@ model CursoPregunta {
 }
 
 model Inscripcion {
-  id            String @id @default(uuid()) @db.Uuid
-  tenantId      String @db.Uuid
-  cursoId       String @db.Uuid
-  personaNombre String
-  personaEmail  String
-  estado        String @default("INSCRITO")
-  createdAt     DateTime @default(now())
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  cursoId       String   @map("curso_id") @db.Uuid
+  personaNombre String   @map("persona_nombre")
+  personaEmail  String   @map("persona_email")
+  estado        String   @default("INSCRITO")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   curso  Curso  @relation(fields: [cursoId], references: [id])
@@ -1308,11 +1308,11 @@ model Inscripcion {
 
 model Evaluacion {
   id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @db.Uuid
-  cursoId       String   @db.Uuid
-  personaNombre String
+  tenantId      String   @map("tenant_id") @db.Uuid
+  cursoId       String   @map("curso_id") @db.Uuid
+  personaNombre String   @map("persona_nombre")
   puntaje       Int      @db.SmallInt
-  aprobado      Boolean  // puntaje >= 70 (RN-801)
+  aprobado      Boolean // puntaje >= 70 (RN-801)
   fecha         DateTime @default(now())
   intento       Int      @default(1)
 
@@ -1326,12 +1326,12 @@ model Evaluacion {
 
 model Certificado {
   id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @db.Uuid
-  evaluacionId  String   @unique @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  evaluacionId  String   @unique @map("evaluacion_id") @db.Uuid
   codigo        String   @unique
-  hashSha256    String
-  pdfStorageKey String?
-  emitidoAt     DateTime @default(now())
+  hashSha256    String   @map("hash_sha256")
+  pdfStorageKey String?  @map("pdf_storage_key")
+  emitidoAt     DateTime @default(now()) @map("emitido_at")
 
   tenant     Tenant     @relation(fields: [tenantId], references: [id])
   evaluacion Evaluacion @relation(fields: [evaluacionId], references: [id])
@@ -1345,10 +1345,10 @@ model Certificado {
 
 model PimsModulo {
   id            String @id @default(uuid()) @db.Uuid
-  numero        Int    @db.SmallInt  // 0..10
+  numero        Int    @db.SmallInt // 0..10
   titulo        String
   descripcion   String @db.Text
-  baseNormativa String
+  baseNormativa String @map("base_normativa")
 
   preguntas PimsPregunta[]
 
@@ -1357,24 +1357,24 @@ model PimsModulo {
 }
 
 model PimsPregunta {
-  id       String @id @default(uuid()) @db.Uuid
-  moduloId String @db.Uuid
-  orden    Int
-  enunciado String @db.Text
-  nota     String? @db.Text
+  id        String  @id @default(uuid()) @db.Uuid
+  moduloId  String  @map("modulo_id") @db.Uuid
+  orden     Int
+  enunciado String  @db.Text
+  nota      String? @db.Text
 
-  modulo     PimsModulo     @relation(fields: [moduloId], references: [id])
+  modulo     PimsModulo      @relation(fields: [moduloId], references: [id])
   respuestas PimsRespuesta[]
 
   @@map("pims_preguntas")
 }
 
 model PimsRespuesta {
-  id          String        @id @default(uuid()) @db.Uuid
-  tenantId    String        @db.Uuid
-  preguntaId  String        @db.Uuid
-  respuesta   RespuestaPIMS
-  respondidoAt DateTime     @default(now())
+  id           String        @id @default(uuid()) @db.Uuid
+  tenantId     String        @map("tenant_id") @db.Uuid
+  preguntaId   String        @map("pregunta_id") @db.Uuid
+  respuesta    RespuestaPIMS
+  respondidoAt DateTime      @default(now()) @map("respondido_at")
 
   tenant   Tenant       @relation(fields: [tenantId], references: [id])
   pregunta PimsPregunta @relation(fields: [preguntaId], references: [id])
@@ -1385,20 +1385,20 @@ model PimsRespuesta {
 }
 
 model SolicitudRegistro {
-  id                  String         @id @default(uuid()) @db.Uuid
-  tenantId            String?        @db.Uuid
-  datos               Json           // respuestas crudas S1..S7
-  pdScore             Int?
-  nivelRiesgo         NivelRiesgo?
-  caso                CasoCotizacion?
-  honorarioMensual    Decimal?       @db.Decimal(10, 2)
-  implementacionFee   Decimal?       @db.Decimal(10, 2)
-  breakdown           Json?          // [{factor, pts}] desc
-  declaracionVeracidad Boolean       @default(false)
-  notaAdicional       String?        @db.Text
-  estado              String         @default("NUEVA") // NUEVA|EN_REVISION|CONVERTIDA|LISTA_ESPERA
-  clienteId           String?        @db.Uuid
-  createdAt           DateTime       @default(now())
+  id                   String          @id @default(uuid()) @db.Uuid
+  tenantId             String?         @map("tenant_id") @db.Uuid
+  datos                Json // respuestas crudas S1..S7
+  pdScore              Int?            @map("pd_score")
+  nivelRiesgo          NivelRiesgo?    @map("nivel_riesgo")
+  caso                 CasoCotizacion?
+  honorarioMensual     Decimal?        @map("honorario_mensual") @db.Decimal(10, 2)
+  implementacionFee    Decimal?        @map("implementacion_fee") @db.Decimal(10, 2)
+  breakdown            Json? // [{factor, pts}] desc
+  declaracionVeracidad Boolean         @default(false) @map("declaracion_veracidad")
+  notaAdicional        String?         @map("nota_adicional") @db.Text
+  estado               String          @default("NUEVA") // NUEVA|EN_REVISION|CONVERTIDA|LISTA_ESPERA
+  clienteId            String?         @map("cliente_id") @db.Uuid
+  createdAt            DateTime        @default(now()) @map("created_at")
 
   tenant  Tenant?  @relation(fields: [tenantId], references: [id])
   cliente Cliente? @relation(fields: [clienteId], references: [id])
@@ -1413,20 +1413,20 @@ model SolicitudRegistro {
 
 model AuditLog {
   id         String    @id @default(uuid()) @db.Uuid
-  tenantId   String    @db.Uuid
-  actorType  ActorType
-  actorId    String    @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  actorType  ActorType @map("actor_type")
+  actorId    String    @map("actor_id") @db.Uuid
   accion     String
   entidad    String
-  entidadId  String    @db.Uuid
+  entidadId  String    @map("entidad_id") @db.Uuid
   antes      Json?
   despues    Json?
   ip         String?
-  userAgent  String?
-  hashSha256 String
-  prevHash   String?
-  chainIndex Int      @default(0)
-  createdAt  DateTime @default(now())
+  userAgent  String?   @map("user_agent")
+  hashSha256 String    @map("hash_sha256")
+  prevHash   String?   @map("prev_hash")
+  chainIndex Int       @default(0) @map("chain_index")
+  createdAt  DateTime  @default(now()) @map("created_at")
   // APPEND ONLY — no updatedAt (INV-4)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
@@ -1439,10 +1439,10 @@ model AuditLog {
 
 model AgenteConversacion {
   id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @db.Uuid
-  usuarioId String   @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  usuarioId String   @map("usuario_id") @db.Uuid
   titulo    String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   tenant   Tenant          @relation(fields: [tenantId], references: [id])
   usuario  User            @relation(fields: [usuarioId], references: [id])
@@ -1453,17 +1453,17 @@ model AgenteConversacion {
 }
 
 model AgenteMensaje {
-  id              String   @id @default(uuid()) @db.Uuid
-  conversacionId  String   @db.Uuid
-  rol             String   // USER | ASSISTANT | TOOL
-  contenido       String   @db.Text
-  toolName        String?
-  toolInput       Json?
-  toolOutput      Json?
-  citas           Json?    // [{norma_id, identificador, hash}]
-  tokensIn        Int?
-  tokensOut       Int?
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+  conversacionId String   @map("conversacion_id") @db.Uuid
+  rol            String // USER | ASSISTANT | TOOL
+  contenido      String   @db.Text
+  toolName       String?  @map("tool_name")
+  toolInput      Json?    @map("tool_input")
+  toolOutput     Json?    @map("tool_output")
+  citas          Json? // [{norma_id, identificador, hash}]
+  tokensIn       Int?     @map("tokens_in")
+  tokensOut      Int?     @map("tokens_out")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   conversacion AgenteConversacion @relation(fields: [conversacionId], references: [id])
 
@@ -1472,10 +1472,10 @@ model AgenteMensaje {
 
 model AgenteActividad {
   id          String   @id @default(uuid()) @db.Uuid
-  tenantId    String   @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
   fase        Int      @db.SmallInt
   descripcion String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -1484,13 +1484,13 @@ model AgenteActividad {
 }
 
 model CorpusChunk {
-  id                 String                           @id @default(uuid()) @db.Uuid
-  normaId            String?                          @db.Uuid
-  controlNormativoId String?                          @db.Uuid
-  contenido          String                           @db.Text
+  id                 String                       @id @default(uuid()) @db.Uuid
+  normaId            String?                      @map("norma_id") @db.Uuid
+  controlNormativoId String?                      @map("control_normativo_id") @db.Uuid
+  contenido          String                       @db.Text
   metadata           Json?
   embedding          Unsupported("vector(1024)")?
-  hashSha256         String
+  hashSha256         String                       @map("hash_sha256")
 
   norma            Norma?            @relation(fields: [normaId], references: [id])
   controlNormativo ControlNormativo? @relation(fields: [controlNormativoId], references: [id])
