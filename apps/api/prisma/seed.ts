@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import * as argon2 from 'argon2';
 import { createHash } from 'crypto';
+import { readFileSync, readdirSync } from 'fs';
+import { parse } from 'yaml';
+import { join } from 'path';
 
 const prisma = new PrismaClient();
 
@@ -7,8 +11,51 @@ function sha256(content: string): string {
   return createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
+/** Same canonicalize function as packages/legal-corpus/scripts/hash.ts */
+function canonicalize(norma: { codigo: string; version: string; titulo: string; texto_normativo: string }): string {
+  return JSON.stringify({
+    codigo: norma.codigo,
+    version: norma.version,
+    titulo: norma.titulo,
+    texto_normativo: norma.texto_normativo,
+  }, null, 0);
+}
+
+interface NormaYaml {
+  codigo: string;
+  fuente: string;
+  tipo: string;
+  identificador: string;
+  titulo: string;
+  categoria: string;
+  resumen_ejecutivo: string;
+  texto_normativo: string;
+  organismo_emisor: string;
+  fecha_emision: string;
+  version: string;
+  estado: string;
+  fase_phva: string;
+  modulos_relacionados: string[];
+  controles?: Array<{
+    titulo: string;
+    descripcion: string;
+    evidencia_requerida: string;
+    fase_phva: string;
+  }>;
+}
+
+interface LockEntry {
+  codigo: string;
+  hash: string;
+  version: string;
+}
+
 async function main() {
   console.log('Seeding LEXDATA IA database...');
+
+  // Pre-compute argon2 hashes (async)
+  const demoHash = await argon2.hash('demo-password');
+  const serviceHash = await argon2.hash('service-account');
 
   // ══════════════════════════════════════════════════════════
   // 1. TENANT + USUARIOS
@@ -22,7 +69,7 @@ async function main() {
     data: {
       tenantId: tenant.id, email: 'andreina.almeida@lexdata.ec',
       nombre: 'Dra. Andreina Almeida', rol: 'DPO_HUMANO',
-      passwordHash: sha256('demo-password'),
+      passwordHash: demoHash,
     },
   });
 
@@ -30,7 +77,7 @@ async function main() {
     data: {
       tenantId: tenant.id, email: 'analista@lexdata.ec',
       nombre: 'Carlos Mendoza', rol: 'DPO_ANALISTA',
-      passwordHash: sha256('demo-password'),
+      passwordHash: demoHash,
     },
   });
 
@@ -38,7 +85,7 @@ async function main() {
     data: {
       tenantId: tenant.id, email: 'mark@lexdata.ec',
       nombre: 'MARK AI', rol: 'MARK_AI',
-      passwordHash: sha256('service-account'),
+      passwordHash: serviceHash,
     },
   });
 
@@ -93,106 +140,88 @@ async function main() {
   });
 
   // ══════════════════════════════════════════════════════════
-  // 3. CORPUS NORMATIVO — 28 nacionales + 8 internacionales
+  // 3. CORPUS NORMATIVO — loaded from YAML + corpus.lock.json
   // ══════════════════════════════════════════════════════════
 
-  const normasData: Array<{
-    codigo: string; fuente: string; tipo: string; identificador: string;
-    titulo: string; categoria: string; fasePHVA: string; resumen: string;
-  }> = [
-    { codigo: 'LOPDP-ART-7', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 7', titulo: 'Consentimiento del titular', categoria: 'Bases de Legitimación', fasePHVA: 'PLANIFICAR', resumen: 'Regula las condiciones del consentimiento como base legal para el tratamiento de datos personales.' },
-    { codigo: 'LOPDP-ART-9', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 9', titulo: 'Obligación legal o reglamentaria', categoria: 'Bases de Legitimación', fasePHVA: 'PLANIFICAR', resumen: 'Establece la obligación legal como base de legitimación para el tratamiento.' },
-    { codigo: 'LOPDP-ART-10', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 10', titulo: 'Principios aplicables al tratamiento', categoria: 'Principios Rectores', fasePHVA: 'PLANIFICAR', resumen: 'Define los 13 principios que rigen todo tratamiento de datos personales.' },
-    { codigo: 'LOPDP-ART-13', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 13', titulo: 'Deber de información', categoria: 'Derechos del Titular', fasePHVA: 'HACER', resumen: 'Obligación del responsable de informar al titular sobre el tratamiento.' },
-    { codigo: 'LOPDP-ART-17', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 17', titulo: 'Protección reforzada — Menores de edad', categoria: 'Categorías Especiales', fasePHVA: 'PLANIFICAR', resumen: 'Establece protección reforzada para datos de NNA.' },
-    { codigo: 'LOPDP-ART-29', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 29', titulo: 'Derecho frente a decisiones automatizadas', categoria: 'Derechos del Titular', fasePHVA: 'HACER', resumen: 'Derecho a no ser objeto de decisiones basadas únicamente en tratamiento automatizado.' },
-    { codigo: 'LOPDP-ART-37', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 37', titulo: 'Registro de actividades de tratamiento', categoria: 'Obligaciones del Responsable', fasePHVA: 'HACER', resumen: 'Obligación de mantener un RAT actualizado.' },
-    { codigo: 'LOPDP-ART-38', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 38', titulo: 'Relación responsable-encargado', categoria: 'Encargados', fasePHVA: 'HACER', resumen: 'Regula la relación contractual entre responsable y encargado.' },
-    { codigo: 'LOPDP-ART-39', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 39', titulo: 'Evaluación de Impacto en Protección de Datos', categoria: 'EIPD', fasePHVA: 'PLANIFICAR', resumen: 'Obligación de realizar EIPD cuando el tratamiento implique alto riesgo.' },
-    { codigo: 'LOPDP-ART-41', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 41', titulo: 'Notificación de brechas de seguridad', categoria: 'Seguridad', fasePHVA: 'HACER', resumen: 'Notificar a la SPDP en máximo 72 horas desde la detección.' },
-    { codigo: 'LOPDP-ART-42', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 42', titulo: 'Funciones del DPO', categoria: 'DPO', fasePHVA: 'PLANIFICAR', resumen: 'Define funciones y responsabilidades del DPO.' },
-    { codigo: 'LOPDP-ART-54', fuente: 'LOPDP', tipo: 'NACIONAL', identificador: 'Art. 54', titulo: 'Transferencias internacionales', categoria: 'Transferencias', fasePHVA: 'PLANIFICAR', resumen: 'Condiciones para transferencias internacionales de datos.' },
-    { codigo: 'RGLOPDP-ART-6', fuente: 'RGLOPDP', tipo: 'NACIONAL', identificador: 'Art. 6', titulo: 'Desarrollo del principio de juridicidad', categoria: 'Principios', fasePHVA: 'PLANIFICAR', resumen: 'Desarrolla el principio de juridicidad.' },
-    { codigo: 'RGLOPDP-ART-15', fuente: 'RGLOPDP', tipo: 'NACIONAL', identificador: 'Art. 15', titulo: 'Designación obligatoria del DPO', categoria: 'DPO', fasePHVA: 'PLANIFICAR', resumen: 'Criterios para la designación obligatoria del DPO.' },
-    { codigo: 'SPDP-RES-2025-0028-R', fuente: 'SPDP', tipo: 'NACIONAL', identificador: 'Res. 2025-0028-R', titulo: 'Obligaciones del DPO ante la SPDP', categoria: 'DPO', fasePHVA: 'PLANIFICAR', resumen: 'Obligaciones de reporte del DPO ante la Superintendencia.' },
-    { codigo: 'SPDP-RES-2024-0015-R', fuente: 'SPDP', tipo: 'NACIONAL', identificador: 'Res. 2024-0015-R', titulo: 'Metodología oficial de EIPD', categoria: 'EIPD', fasePHVA: 'PLANIFICAR', resumen: 'Metodología EIPD-EC oficial.' },
-    { codigo: 'SGPDP-RES-0005-2026', fuente: 'SGPDP', tipo: 'NACIONAL', identificador: 'Res. 0005-2026-SGPDP', titulo: 'Categorización ampliada', categoria: 'Categorías Especiales', fasePHVA: 'PLANIFICAR', resumen: 'Datos de comportamiento digital y biométricos como protección reforzada.' },
-    { codigo: 'CRE-ART-11', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 11', titulo: 'Principio de igualdad', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Todas las personas son iguales y gozarán de los mismos derechos.' },
-    { codigo: 'CRE-ART-16', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 16', titulo: 'Derecho a la comunicación', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Derecho a la comunicación libre.' },
-    { codigo: 'CRE-ART-18', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 18', titulo: 'Derecho a la información', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Acceso a información de instituciones públicas.' },
-    { codigo: 'CRE-ART-23', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 23', titulo: 'Calidad de servicios', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Derecho a recibir servicios de calidad.' },
-    { codigo: 'CRE-ART-44', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 44', titulo: 'Protección de NNA', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'El Estado protegerá a NNA.' },
-    { codigo: 'CRE-ART-66-19', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 66.19', titulo: 'Derecho a la protección de datos', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Protección de datos de carácter personal.' },
-    { codigo: 'CRE-ART-66-20', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 66.20', titulo: 'Derecho a la intimidad', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Intimidad personal y familiar.' },
-    { codigo: 'CRE-ART-66-21', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 66.21', titulo: 'Inviolabilidad de correspondencia', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Secreto de la correspondencia.' },
-    { codigo: 'CRE-ART-75', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 75', titulo: 'Tutela judicial efectiva', categoria: 'Derechos Fundamentales', fasePHVA: 'PLANIFICAR', resumen: 'Tutela judicial efectiva.' },
-    { codigo: 'CRE-ART-92', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 92', titulo: 'Hábeas Data', categoria: 'Garantías', fasePHVA: 'PLANIFICAR', resumen: 'Acceso y decisión sobre datos personales.' },
-    { codigo: 'CRE-ART-229', fuente: 'CRE', tipo: 'NACIONAL', identificador: 'Art. 229', titulo: 'Servidores públicos', categoria: 'Función Pública', fasePHVA: 'PLANIFICAR', resumen: 'Regulación de servidores públicos.' },
-    { codigo: 'ISO27001-6.1', fuente: 'ISO_27001', tipo: 'INTERNACIONAL', identificador: '§6.1', titulo: 'Acciones para abordar riesgos', categoria: 'Gestión de Riesgos', fasePHVA: 'PLANIFICAR', resumen: 'Planificación de acciones para riesgos del SGSI.' },
-    { codigo: 'ISO27001-8.2', fuente: 'ISO_27001', tipo: 'INTERNACIONAL', identificador: '§8.2', titulo: 'Evaluación de riesgos de seguridad', categoria: 'Gestión de Riesgos', fasePHVA: 'HACER', resumen: 'Ejecución de la evaluación de riesgos.' },
-    { codigo: 'ISO27701-5.2', fuente: 'ISO_27701', tipo: 'INTERNACIONAL', identificador: '§5.2', titulo: 'Política de privacidad', categoria: 'Gobernanza', fasePHVA: 'PLANIFICAR', resumen: 'Requisitos para la política de privacidad.' },
-    { codigo: 'ISO27701-6.1', fuente: 'ISO_27701', tipo: 'INTERNACIONAL', identificador: '§6.1', titulo: 'Evaluación de riesgos de privacidad', categoria: 'Gestión de Riesgos', fasePHVA: 'PLANIFICAR', resumen: 'Análisis de riesgos de privacidad.' },
-    { codigo: 'ISO42001-6.1', fuente: 'ISO_42001', tipo: 'INTERNACIONAL', identificador: '§6.1', titulo: 'Riesgos en sistemas de IA', categoria: 'IA', fasePHVA: 'PLANIFICAR', resumen: 'Gestión de riesgos en sistemas de IA.' },
-    { codigo: 'ISO42001-8.4', fuente: 'ISO_42001', tipo: 'INTERNACIONAL', identificador: '§8.4', titulo: 'Operación de sistemas de IA', categoria: 'IA', fasePHVA: 'HACER', resumen: 'Requisitos operativos para sistemas de IA.' },
-    { codigo: 'NIST-PR.DS-1', fuente: 'NIST', tipo: 'INTERNACIONAL', identificador: 'PR.DS-1', titulo: 'Data-at-Rest Protection', categoria: 'Seguridad', fasePHVA: 'HACER', resumen: 'Protección de datos en reposo.' },
-    { codigo: 'NIST-PR.DS-2', fuente: 'NIST', tipo: 'INTERNACIONAL', identificador: 'PR.DS-2', titulo: 'Data-in-Transit Protection', categoria: 'Seguridad', fasePHVA: 'HACER', resumen: 'Protección de datos en tránsito.' },
-  ];
+  const corpusBase = join(__dirname, '..', '..', '..', 'packages', 'legal-corpus');
+  const lockPath = join(corpusBase, 'corpus.lock.json');
+  const lockData: LockEntry[] = JSON.parse(readFileSync(lockPath, 'utf8'));
+  const lockMap = new Map(lockData.map(e => [e.codigo, e]));
 
+  // Read all YAML files from corpus/nacional and corpus/internacional
+  const allNormas: NormaYaml[] = [];
+  for (const subdir of ['nacional', 'internacional']) {
+    const dir = join(corpusBase, 'corpus', subdir);
+    let files: string[];
+    try { files = readdirSync(dir).filter(f => f.endsWith('.yaml')); } catch { continue; }
+    for (const file of files) {
+      const content = readFileSync(join(dir, file), 'utf8');
+      const normas: NormaYaml[] = parse(content);
+      allNormas.push(...normas);
+    }
+  }
+
+  // Verify hashes and create normas + controles
   const normaIds: Record<string, string> = {};
-  for (const n of normasData) {
-    const texto = `Texto normativo de ${n.identificador} — ${n.titulo}. TODO: verificar con LEGAL_ADMIN`;
-    const emisor = ['CRE', 'LOPDP', 'RGLOPDP'].includes(n.fuente) ? 'Asamblea Nacional' : ['SPDP', 'SGPDP'].includes(n.fuente) ? 'SPDP' : 'Organismo Internacional';
+  let controlCount = 0;
+
+  for (const n of allNormas) {
+    const lockEntry = lockMap.get(n.codigo);
+    if (!lockEntry) {
+      throw new Error(`Norma ${n.codigo} not found in corpus.lock.json`);
+    }
+
+    // Verify hash matches lock file
+    const computedHash = sha256(canonicalize(n));
+    if (computedHash !== lockEntry.hash) {
+      throw new Error(
+        `Hash mismatch for ${n.codigo}: computed=${computedHash}, lock=${lockEntry.hash}. ` +
+        `Run 'pnpm --filter legal-corpus hash' to regenerate the lock file.`
+      );
+    }
+
     const created = await prisma.norma.create({
       data: {
-        codigo: n.codigo, fuente: n.fuente as any, tipo: n.tipo as any,
-        identificador: n.identificador, titulo: n.titulo, categoria: n.categoria,
-        resumenEjecutivo: n.resumen, textoNormativo: texto,
-        organismoEmisor: emisor, fechaEmision: new Date('2021-05-26'),
-        fasePHVA: n.fasePHVA as any, hashSha256: sha256(texto), modulosRelacionados: [],
+        codigo: n.codigo,
+        fuente: n.fuente as any,
+        tipo: n.tipo as any,
+        identificador: n.identificador,
+        titulo: n.titulo,
+        categoria: n.categoria,
+        resumenEjecutivo: n.resumen_ejecutivo,
+        textoNormativo: n.texto_normativo,
+        organismoEmisor: n.organismo_emisor,
+        fechaEmision: new Date(n.fecha_emision),
+        version: n.version,
+        fasePHVA: n.fase_phva as any,
+        hashSha256: lockEntry.hash,
+        modulosRelacionados: n.modulos_relacionados ?? [],
       },
     });
     normaIds[n.codigo] = created.id;
+
+    // Create associated controles normativos from YAML
+    if (n.controles) {
+      for (const ctrl of n.controles) {
+        await prisma.controlNormativo.create({
+          data: {
+            normaId: created.id,
+            titulo: ctrl.titulo,
+            descripcion: ctrl.descripcion,
+            evidenciaRequerida: ctrl.evidencia_requerida,
+            fasePHVA: ctrl.fase_phva as any,
+            hashSha256: sha256(`${ctrl.titulo}|${ctrl.evidencia_requerida}`),
+          },
+        });
+        controlCount++;
+      }
+    }
   }
-  console.log(`  ${normasData.length} normas`);
+  console.log(`  ${allNormas.length} normas`);
+  console.log(`  ${controlCount} controles normativos`);
 
   // ══════════════════════════════════════════════════════════
-  // 4. CONTROLES NORMATIVOS (18)
-  // ══════════════════════════════════════════════════════════
-
-  const ctrlData = [
-    { n: 'LOPDP-ART-7', t: 'Formulario de consentimiento informado', e: 'Registro de consentimientos firmados o electrónicos', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-7', t: 'Mecanismo de revocación de consentimiento', e: 'Pantalla o formulario de revocación activo', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-9', t: 'Inventario de obligaciones legales aplicables', e: 'Documento con base legal y norma habilitante', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-10', t: 'Auditoría de principios por tratamiento (13 principios)', e: 'Acta de auditoría con checklist', f: 'VERIFICAR' },
-    { n: 'LOPDP-ART-10', t: 'Política de protección de datos publicada', e: 'URL pública o acuse de recibo interno', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-13', t: 'Aviso de privacidad y política publicados', e: 'Aviso vigente en web o documento entregado', f: 'HACER' },
-    { n: 'LOPDP-ART-39', t: 'Evaluación de impacto documentada', e: 'Informe EIPD con firma del DPO', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-39', t: 'Registro de tratamientos con EIPD obligatoria', e: 'Lista actualizada en RAT', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-41', t: 'Protocolo de notificación 72h a SPDP', e: 'Protocolo documentado y capacitación', f: 'HACER' },
-    { n: 'LOPDP-ART-41', t: 'Plan de respuesta a incidentes', e: 'Plan aprobado y simulacro anual', f: 'HACER' },
-    { n: 'LOPDP-ART-29', t: 'Mecanismo de revisión humana de decisiones automatizadas', e: 'Canal habilitado + tiempo de respuesta', f: 'HACER' },
-    { n: 'LOPDP-ART-38', t: 'Contrato de encargado formalizado', e: 'Contrato firmado con cláusulas LOPDP', f: 'HACER' },
-    { n: 'LOPDP-ART-54', t: 'Garantías de transferencia internacional', e: 'SCCs o nivel de adecuación', f: 'PLANIFICAR' },
-    { n: 'LOPDP-ART-37', t: 'RAT actualizado', e: 'RAT vigente con fecha de última revisión', f: 'HACER' },
-    { n: 'LOPDP-ART-42', t: 'DPO designado y notificado a la SPDP', e: 'Comunicación a la SPDP + nombramiento', f: 'PLANIFICAR' },
-    { n: 'NIST-PR.DS-1', t: 'Cifrado de datos en reposo (AES-256)', e: 'Configuración verificada por auditoría técnica', f: 'HACER' },
-    { n: 'ISO27701-5.2', t: 'Política de privacidad aprobada por dirección', e: 'Acta firmada por Gerente General', f: 'PLANIFICAR' },
-    { n: 'ISO27701-6.1', t: 'Análisis de riesgos de privacidad anual', e: 'Informe con fecha y firma del DPO', f: 'PLANIFICAR' },
-  ];
-
-  for (const c of ctrlData) {
-    await prisma.controlNormativo.create({
-      data: {
-        normaId: normaIds[c.n], titulo: c.t, descripcion: c.t,
-        evidenciaRequerida: c.e, fasePHVA: c.f as any,
-        hashSha256: sha256(`${c.t}|${c.e}`),
-      },
-    });
-  }
-  console.log(`  ${ctrlData.length} controles normativos`);
-
-  // ══════════════════════════════════════════════════════════
-  // 5. PRINCIPIOS RECTORES (13) + PREGUNTAS + ESTADO
+  // 4. PRINCIPIOS RECTORES (13) + PREGUNTAS + ESTADO
   // ══════════════════════════════════════════════════════════
 
   const principios = [
@@ -232,7 +261,7 @@ async function main() {
   console.log('  13 principios rectores');
 
   // ══════════════════════════════════════════════════════════
-  // 6. CATEGORÍAS DE DATOS (7)
+  // 5. CATEGORÍAS DE DATOS (7)
   // ══════════════════════════════════════════════════════════
 
   const cats = [
@@ -256,7 +285,7 @@ async function main() {
   console.log('  7 categorías de datos');
 
   // ══════════════════════════════════════════════════════════
-  // 7. AMENAZAS Y VULNERABILIDADES
+  // 6. AMENAZAS Y VULNERABILIDADES
   // ══════════════════════════════════════════════════════════
 
   const amenazas = [
@@ -279,7 +308,7 @@ async function main() {
   console.log('  6 amenazas + vulnerabilidades');
 
   // ══════════════════════════════════════════════════════════
-  // 8. DIAGNÓSTICO: 5 DIMENSIONES + 17 PREGUNTAS
+  // 7. DIAGNÓSTICO: 5 DIMENSIONES + 17 PREGUNTAS
   // ══════════════════════════════════════════════════════════
 
   const dims = [
@@ -323,7 +352,7 @@ async function main() {
   console.log('  5 dimensiones + 17 preguntas');
 
   // ══════════════════════════════════════════════════════════
-  // 9. CHECKLIST LOPDP (8 preguntas)
+  // 8. CHECKLIST LOPDP (8 preguntas)
   // ══════════════════════════════════════════════════════════
 
   const checklist = [
@@ -345,7 +374,7 @@ async function main() {
   console.log('  8 checklist items');
 
   // ══════════════════════════════════════════════════════════
-  // 10. CURSOS (8) + 10 PREGUNTAS CADA UNO
+  // 9. CURSOS (8) + 10 PREGUNTAS CADA UNO
   // ══════════════════════════════════════════════════════════
 
   const cursosData = [
@@ -376,7 +405,7 @@ async function main() {
   console.log('  8 cursos + 80 preguntas');
 
   // ══════════════════════════════════════════════════════════
-  // 11. PIMS MÓDULOS (0-10) + 3 PREGUNTAS CADA UNO
+  // 10. PIMS MÓDULOS (0-10) + 3 PREGUNTAS CADA UNO
   // ══════════════════════════════════════════════════════════
 
   const pimsData = [
@@ -410,7 +439,7 @@ async function main() {
   console.log('  11 módulos PIMS + 33 preguntas');
 
   // ══════════════════════════════════════════════════════════
-  // 12. DEMO DATA: tratamientos, activos, riesgos, controles, etc.
+  // 11. DEMO DATA: tratamientos, activos, riesgos, controles, etc.
   // ══════════════════════════════════════════════════════════
 
   const t1 = await prisma.tratamiento.create({ data: { tenantId: tenant.id, codigoRat: 'a1', nombre: 'Gestión de clientes CRM', finalidad: 'Ejecución de contrato', baseLegal: 'Art. 8 LOPDP', area: 'Comercial', estado: 'PENDIENTE' } });
@@ -429,8 +458,8 @@ async function main() {
   await prisma.riesgo.create({ data: { tenantId: tenant.id, tratamientoId: t1.id, activoId: a1.id, impacto: 4, probabilidad: 2, score: 8, nivel: 'ALTO', estado: 'IDENTIFICADO', vulnerabilidadTexto: 'Fuga de datos desde CRM — Permisos de exportación sin restricción' } });
   await prisma.riesgo.create({ data: { tenantId: tenant.id, tratamientoId: t2.id, activoId: a2.id, impacto: 3, probabilidad: 2, score: 6, nivel: 'MEDIO', estado: 'MITIGADO', vulnerabilidadTexto: 'Exposición de datos de nómina — Backups sin cifrado en S3' } });
 
-  // 6 controles
-  await prisma.control.create({ data: { tenantId: tenant.id, tipo: 'TECNICO', titulo: 'Cifrado de datos en reposo AES-256', baseNormativa: 'Art. 30 / NIST PR.DS-1', normaId: normaIds['NIST-PR.DS-1'], estado: 'IMPLEMENTADO', eficacia: 'ALTA' } });
+  // 6 controles — use YAML-canonical codes (dashes, not dots)
+  await prisma.control.create({ data: { tenantId: tenant.id, tipo: 'TECNICO', titulo: 'Cifrado de datos en reposo AES-256', baseNormativa: 'Art. 30 / NIST PR.DS-1', normaId: normaIds['NIST-PR-DS-1'], estado: 'IMPLEMENTADO', eficacia: 'ALTA' } });
   await prisma.control.create({ data: { tenantId: tenant.id, tipo: 'TECNICO', titulo: 'MFA — Autenticación multifactor', baseNormativa: 'Art. 30 LOPDP', estado: 'EN_PROGRESO' } });
   await prisma.control.create({ data: { tenantId: tenant.id, tipo: 'TECNICO', titulo: 'Registro de auditoría — logs inmutables', baseNormativa: 'Art. 37 LOPDP', normaId: normaIds['LOPDP-ART-37'], estado: 'IMPLEMENTADO', eficacia: 'MEDIA' } });
   await prisma.control.create({ data: { tenantId: tenant.id, tipo: 'LEGAL', titulo: 'Contrato de encargado con proveedores', baseNormativa: 'Art. 38 LOPDP', normaId: normaIds['LOPDP-ART-38'], estado: 'EN_PROGRESO' } });
