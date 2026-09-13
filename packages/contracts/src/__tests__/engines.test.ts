@@ -595,7 +595,7 @@ describe('Maturity Engine (RN-701)', () => {
       // ponderado = 33*0.2 + 67*0.2 = 6.6 + 13.4 = 20
       // valor = 1 + 20/100*4 = 1.8
       const strVal = result.valor.toString();
-      const decimals = strVal.includes('.') ? strVal.split('.')[1].length : 0;
+      const decimals = strVal.includes('.') ? strVal.split('.')[1]!.length : 0;
       expect(decimals).toBeLessThanOrEqual(2);
     });
   });
@@ -707,8 +707,8 @@ describe('Control Gap Engine', () => {
       { categoria: 'Tecnicos', necesarios: 10, implementados: 8 },
       { categoria: 'Organizativos', necesarios: 5, implementados: 0 },
     ]);
-    expect(result.detalle[0].porcentaje).toBe(80);
-    expect(result.detalle[1].porcentaje).toBe(0);
+    expect(result.detalle[0]!.porcentaje).toBe(80);
+    expect(result.detalle[1]!.porcentaje).toBe(0);
   });
 });
 
