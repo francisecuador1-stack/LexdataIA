@@ -15,17 +15,16 @@ export class TenantGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    if (!user?.tenantId || !user?.rol) return true; // public routes
 
-    if (user?.tenantId && user?.rol) {
-      const claims = JSON.stringify({
-        tenant_id: user.tenantId,
-        rol: user.rol,
-        sub: user.sub,
-      });
-      await this.prisma.$executeRawUnsafe(
-        `SELECT set_config('request.jwt.claims', '${claims}', true)`,
-      );
-    }
+    const claims = JSON.stringify({
+      tenant_id: user.tenantId,
+      rol: user.rol,
+      sub: user.sub,
+    });
+
+    // Use $executeRaw (tagged template) — parameterized, not interpolated
+    await this.prisma.$executeRaw`SELECT set_config('request.jwt.claims', ${claims}::text, true)`;
 
     return true;
   }

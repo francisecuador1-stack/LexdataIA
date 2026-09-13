@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
+import { Public } from '../common/decorators/public.decorator';
 import { PortalService } from './portal.service';
 
 @Controller('portal')
@@ -19,11 +20,13 @@ export class PortalController {
 
   // ── Registro (formulario SPDP + Pd-VaR) ──
 
+  @Public()
   @Post('registro')
   crearRegistro(@Body() body: any) {
     return this.service.crearRegistro(body);
   }
 
+  @Public()
   @Get('registro/:id/resultado')
   getResultadoRegistro(@Param('id') id: string) {
     return this.service.getResultadoRegistro(id);

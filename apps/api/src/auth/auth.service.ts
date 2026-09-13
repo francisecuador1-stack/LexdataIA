@@ -163,8 +163,8 @@ export class AuthService {
     if (!user) return { message: 'Si el correo existe, recibirá un enlace de recuperación' };
 
     const resetToken = jwt.sign({ sub: user.id, purpose: 'reset' }, this.jwtSecret, { expiresIn: '30m' });
-    // TODO: Send email with reset link
-    return { message: 'Si el correo existe, recibirá un enlace de recuperación', resetToken };
+    // TODO: Send email with reset link containing resetToken
+    return { message: 'Si el correo existe, recibirá un enlace de recuperación' };
   }
 
   async resetPassword(token: string, newPassword: string) {
