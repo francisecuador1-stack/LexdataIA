@@ -5,7 +5,7 @@ import '../../core/storage/secure_storage.dart';
 /// Repository that talks to the API auth endpoints.
 /// In development, returns mock data when the API is unreachable.
 class AuthRepository {
-  AuthRepository({required Dio dio, required this.storage}) : _dio = dio;
+  AuthRepository({required this._dio, required this.storage});
 
   final Dio _dio;
   final SecureTokenStorage storage;

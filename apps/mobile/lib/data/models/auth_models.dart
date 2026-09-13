@@ -1,4 +1,5 @@
 /// Login request/response models.
+library;
 
 class LoginRequest {
   const LoginRequest({required this.email, required this.password});

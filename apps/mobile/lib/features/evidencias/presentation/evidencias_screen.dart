@@ -28,7 +28,6 @@ enum _TipoEvidencia {
 enum _EstadoEvidencia {
   subida('Subida', AppColors.green600),
   enCola('En cola offline', AppColors.amber600),
-  subiendo('Subiendo...', AppColors.blue600),
   errorIntegridad('Error de integridad', AppColors.red500);
 
   const _EstadoEvidencia(this.label, this.color);
@@ -53,7 +52,6 @@ class _EvidenciaMock {
     required this.estado,
     required this.controlAsociado,
     required this.areaResponsable,
-    this.progreso,
     this.archivoNombre,
     this.comprimida = false,
   });
@@ -66,7 +64,6 @@ class _EvidenciaMock {
   final _EstadoEvidencia estado;
   final String controlAsociado;
   final String areaResponsable;
-  final double? progreso;
   final String? archivoNombre;
   final bool comprimida;
 }
@@ -122,7 +119,7 @@ class EvidenciasScreen extends ConsumerStatefulWidget {
 }
 
 class _EvidenciasScreenState extends ConsumerState<EvidenciasScreen> {
-  List<_EvidenciaMock> _evidencias = List.of(_mockEvidencias);
+  final List<_EvidenciaMock> _evidencias = List.of(_mockEvidencias);
   int _offlineCount = 0;
 
   // -----------------------------------------------------------------------
@@ -428,50 +425,6 @@ class _EvidenciaCard extends StatelessWidget {
             child: HashChip(hash: evidencia.hashSha256),
           ),
           const SizedBox(height: 10),
-
-          // Upload progress bar (only when uploading)
-          if (evidencia.estado == _EstadoEvidencia.subiendo &&
-              evidencia.progreso != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: evidencia.progreso,
-                            minHeight: 6,
-                            backgroundColor:
-                                AppColors.slate200.withValues(alpha: 0.5),
-                            valueColor: const AlwaysStoppedAnimation(
-                                AppColors.blue600),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(evidencia.progreso! * 100).toInt()}%',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.blue600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Subida reanudable en progreso...',
-                    style: TextStyle(fontSize: 11, color: AppColors.slate400),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
 
           // Integrity error banner
           if (evidencia.estado == _EstadoEvidencia.errorIntegridad)
@@ -992,7 +945,7 @@ class _AddEvidenciaSheetState extends State<_AddEvidenciaSheet> {
                       ),
                       Switch(
                         value: _comprimirImagenes,
-                        activeColor: AppColors.blue600,
+                        activeThumbColor: AppColors.blue600,
                         onChanged: (v) {
                           setState(() {
                             _comprimirImagenes = v;
@@ -1161,7 +1114,7 @@ class _AddEvidenciaSheetState extends State<_AddEvidenciaSheet> {
                       ),
                       Switch(
                         value: _isOffline,
-                        activeColor: AppColors.amber600,
+                        activeThumbColor: AppColors.amber600,
                         onChanged: (v) => setState(() => _isOffline = v),
                       ),
                     ],
@@ -1267,7 +1220,7 @@ class _AddEvidenciaSheetState extends State<_AddEvidenciaSheet> {
 
   Widget _buildDropdown() {
     return DropdownButtonFormField<_TipoEvidencia>(
-      value: _tipo,
+      initialValue: _tipo,
       onChanged: (v) => setState(() => _tipo = v ?? _TipoEvidencia.otro),
       style: const TextStyle(fontSize: 14, color: AppColors.slate700),
       decoration: InputDecoration(
