@@ -10,8 +10,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src"],
-  "exclude": [
-    "src/common/tracing/otel.config.ts"
-  ]
+  "include": ["src"]
 }
