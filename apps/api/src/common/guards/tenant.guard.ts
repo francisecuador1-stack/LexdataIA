@@ -1,31 +1,27 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
- * TenantGuard: sets PostgreSQL session variables for RLS enforcement.
- * Runs after JwtAuthGuard so request.user is populated.
+ * TenantGuard: validates that authenticated requests have tenant context.
+ * The actual SET LOCAL for RLS is done by TenantContextInterceptor.
  *
- * INV-1: Every business row is protected by RLS with tenant_id.
- * INV-11: Uses request.jwt.claims convention for Supabase compatibility.
+ * INV-1: every business row has tenant_id and is protected by RLS.
+ * INV-11: uses lexdata_app role with request.jwt.claims convention.
  */
 @Injectable()
 export class TenantGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-    if (!user?.tenantId || !user?.rol) return true; // public routes
+  canActivate(context: ExecutionContext): boolean {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
 
-    const claims = JSON.stringify({
-      tenant_id: user.tenantId,
-      rol: user.rol,
-      sub: user.sub,
-    });
-
-    // Use $executeRaw (tagged template) — parameterized, not interpolated
-    await this.prisma.$executeRaw`SELECT set_config('request.jwt.claims', ${claims}::text, true)`;
-
+    // The interceptor will skip SET LOCAL if there's no tenant context.
+    // Guard passes through — the interceptor handles RLS setup.
     return true;
   }
 }

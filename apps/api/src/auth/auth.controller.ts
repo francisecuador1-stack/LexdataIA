@@ -1,5 +1,6 @@
 import { Controller, Post, Get, Body, Res, Req, HttpCode } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -9,6 +10,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(200)
   async login(
     @Body() body: { email: string; password: string; totpCode?: string },
@@ -70,6 +72,7 @@ export class AuthController {
 
   @Public()
   @Post('password/forgot')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(200)
   async forgotPassword(@Body() body: { email: string }) {
     return this.auth.forgotPassword(body.email);
