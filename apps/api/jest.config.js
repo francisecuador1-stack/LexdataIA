@@ -5,7 +5,8 @@ module.exports = {
   testRegex: '.*\\.spec\\.ts$',
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
   transformIgnorePatterns: [
-    'node_modules/(?!(@nestjs/config|@nestjs/throttler)/)',
+    '/node_modules/.pnpm/(?!(@nestjs\\+config|@nestjs\\+throttler))',
+    '/node_modules/(?!(\\.pnpm|@nestjs/config|@nestjs/throttler))',
   ],
   testEnvironment: 'node',
 };
