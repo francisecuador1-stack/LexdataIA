@@ -14,6 +14,13 @@ import { PrismaService } from '../../prisma/prisma.service';
  * with SET LOCAL for RLS. Runs after JwtAuthGuard + RolesGuard so
  * request.user is populated.
  *
+ * The transaction stays open for the duration of the handler.
+ * For endpoints that make external API calls (e.g., /agente/chat →
+ * Anthropic), the transaction timeout (30s) acts as a ceiling.
+ * Long-running streaming endpoints should be marked @Public() or
+ * use a dedicated pattern that commits the DB work first and then
+ * streams the external response.
+ *
  * Public routes (@Public()) skip the transaction.
  *
  * INV-1: every business row is protected by RLS with tenant_id.
