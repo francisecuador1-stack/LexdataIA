@@ -16,27 +16,22 @@ export interface TenantContext {
 export const tenantTxStore = new AsyncLocalStorage<Prisma.TransactionClient>();
 
 /**
- * Model accessor names on PrismaClient.
- * When accessed, the Proxy routes to the transactional client if one exists.
+ * Model accessor names on PrismaClient, derived from Prisma DMMF at import time.
+ * This ensures new models are automatically included — no manual list to maintain.
  */
-const PRISMA_MODEL_NAMES = new Set([
-  'tenant', 'user', 'cliente', 'norma', 'controlNormativo',
-  'principioRector', 'principioPreguntaAuditoria', 'principioEstado',
-  'normaFavorita', 'normaVista', 'proceso', 'procesoNorma',
-  'tratamiento', 'activo', 'tratamientoActivo', 'categoriaDatos',
-  'categoriaDatosTenant', 'amenaza', 'vulnerabilidad', 'riesgo',
-  'evaluacionEipd', 'diagnosticoDimension', 'diagnosticoPregunta',
-  'diagnosticoRespuesta', 'gobiernoItem', 'rolSgpdp', 'recursoEvaluacion',
-  'brecha', 'control', 'medida', 'validacionPrincipio', 'planAccion',
-  'evidencia', 'documento', 'firma', 'solicitudFirma', 'auditoria',
-  'revisionTecnica', 'checklistItem', 'checklistRespuesta', 'hallazgo',
-  'incidente', 'solicitudArco', 'kpiSnapshot', 'madurezSnapshot',
-  'recomendacion', 'accionCorrectiva', 'leccion', 'oportunidadMejora',
-  'curso', 'cursoPregunta', 'inscripcion', 'evaluacion', 'certificado',
-  'pimsModulo', 'pimsPregunta', 'pimsRespuesta', 'solicitudRegistro',
-  'auditLog', 'agenteConversacion', 'agenteMensaje', 'agenteActividad',
-  'corpusChunk',
-]);
+const PRISMA_MODEL_NAMES: Set<string> = (() => {
+  try {
+    const dmmf = Prisma.dmmf.datamodel.models;
+    // Model accessor names are the model name with first letter lowercased
+    return new Set(dmmf.map((m: { name: string }) => {
+      const n = m.name;
+      return n.charAt(0).toLowerCase() + n.slice(1);
+    }));
+  } catch {
+    // Fallback if DMMF is not available (e.g., during testing without generate)
+    return new Set<string>();
+  }
+})();
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
