@@ -4,6 +4,31 @@ Operational procedures for every alert defined in `infra/alerts/alert-rules.yaml
 
 ---
 
+## Provisioning: lexdata_app Role
+
+The API connects as `lexdata_app` (NOBYPASSRLS). This role is created by
+the migrations but its **password must be set manually per environment**:
+
+```sql
+-- Connect as superuser (postgres)
+ALTER ROLE lexdata_app LOGIN PASSWORD 'generate-a-strong-password-here';
+```
+
+Set `DATABASE_URL` in the environment to use this role:
+```
+DATABASE_URL=postgresql://lexdata_app:<password>@<host>:5432/<db>?pgbouncer=true
+```
+
+The role must have:
+- `LOGIN` — granted by migration `20260912200000_lexdata_app_login.sql`
+- `NOBYPASSRLS` — set at creation in `20260912000000_initial_schema.sql`
+- `SELECT, INSERT, UPDATE, DELETE` on all tables — granted in initial migration
+
+If deploying to Supabase, the role and grants are applied automatically
+when you run `pnpm db:apply` as superuser.
+
+---
+
 ## Incidente Near 24h Deadline
 
 **Alert:** `IncidenteNear24hDeadline`

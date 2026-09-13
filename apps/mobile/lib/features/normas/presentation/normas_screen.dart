@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../shared/widgets/phase_header.dart';
+
 import '../../../shared/widgets/badge_chip.dart';
 import '../../../shared/widgets/hash_chip.dart';
 import '../../../shared/widgets/status_toggle.dart';
@@ -18,7 +18,6 @@ class _NormasScreenState extends State<NormasScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabCtrl;
   String _search = '';
-  String _selectedNormaId = '';
   final _favorites = <String>{};
   String _scope = 'Nacional';
 
@@ -122,7 +121,7 @@ class _NormasScreenState extends State<NormasScreen>
         Expanded(
           child: ListView.separated(
             itemCount: normas.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (_, i) {
               final n = normas[i];
               final isFav = _favorites.contains(n.id);

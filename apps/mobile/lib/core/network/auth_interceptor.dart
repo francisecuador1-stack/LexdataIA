@@ -6,9 +6,9 @@ import '../storage/secure_storage.dart';
 /// single-flight concurrency (only one refresh at a time).
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
-    required Dio dio,
+    required this._dio,
     required this.tokenStorage,
-  }) : _dio = dio;
+  });
 
   final Dio _dio;
   final SecureTokenStorage tokenStorage;

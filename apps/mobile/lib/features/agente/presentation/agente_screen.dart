@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../shared/widgets/badge_chip.dart';
+
 
 // ---------------------------------------------------------------------------
 // Domain models
@@ -47,9 +47,6 @@ class _ChatMessage {
 
 /// Tracks network connectivity (simplified; replace with connectivity_plus).
 final _connectivityProvider = StateProvider<bool>((ref) => true);
-
-/// Active client id for per-client history isolation.
-final _activeClientProvider = StateProvider<String?>((ref) => null);
 
 /// Chat messages keyed by client id.
 final _chatMessagesProvider =

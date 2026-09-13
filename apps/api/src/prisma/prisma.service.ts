@@ -20,17 +20,17 @@ export const tenantTxStore = new AsyncLocalStorage<Prisma.TransactionClient>();
  * This ensures new models are automatically included — no manual list to maintain.
  */
 const PRISMA_MODEL_NAMES: Set<string> = (() => {
-  try {
-    const dmmf = Prisma.dmmf.datamodel.models;
-    // Model accessor names are the model name with first letter lowercased
-    return new Set(dmmf.map((m: { name: string }) => {
-      const n = m.name;
-      return n.charAt(0).toLowerCase() + n.slice(1);
-    }));
-  } catch {
-    // Fallback if DMMF is not available (e.g., during testing without generate)
-    return new Set<string>();
+  const dmmf = Prisma.dmmf?.datamodel?.models;
+  if (!dmmf || dmmf.length === 0) {
+    throw new Error(
+      'Prisma DMMF not available. Run `pnpm db:generate` first. ' +
+      'Without DMMF, the tenant Proxy cannot route queries and RLS isolation is broken.',
+    );
   }
+  return new Set(dmmf.map((m: { name: string }) => {
+    const n = m.name;
+    return n.charAt(0).toLowerCase() + n.slice(1);
+  }));
 })();
 
 @Injectable()

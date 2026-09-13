@@ -14,7 +14,7 @@ enum _IncidenteTipo {
   brechaSeguridad,
   accesoNoAutorizado,
   perdidaDatos,
-  ransomware,
+
   filtracion,
 }
 
@@ -300,7 +300,7 @@ class _IncidentesScreenState extends ConsumerState<IncidentesScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final f = filters[index];
           final selected = _filtroEstado == f;
@@ -1079,7 +1079,7 @@ class _RegistroIncidenteFormState extends State<_RegistroIncidenteForm> {
               _formLabel('TIPO DE INCIDENTE'),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _tipoSeleccionado,
+                initialValue: _tipoSeleccionado,
                 decoration: _inputDecoration(),
                 items: _tipos
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))

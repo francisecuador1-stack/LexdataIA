@@ -16,7 +16,7 @@ class SyncStatusBar extends ConsumerWidget {
     return connectivityAsync.when(
       data: (isOnline) => _buildBar(isOnline, db.pendingCount),
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => _buildBar(false, db.pendingCount),
+      error: (_, _) => _buildBar(false, db.pendingCount),
     );
   }
 

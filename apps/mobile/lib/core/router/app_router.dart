@@ -39,27 +39,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (_, __) => const LoginScreen(),
+        builder: (_, _) => const LoginScreen(),
       ),
 
       // DPO shell — bottom nav with DPO tabs
       ShellRoute(
-        builder: (_, __, child) => DpoShell(child: child),
+        builder: (_, _, child) => DpoShell(child: child),
         routes: [
           GoRoute(
             path: '/dashboard',
             name: 'dashboard',
-            builder: (_, __) => const DashboardScreen(),
+            builder: (_, _) => const DashboardScreen(),
           ),
           GoRoute(
             path: '/normas',
             name: 'normas',
-            builder: (_, __) => const NormasScreen(),
+            builder: (_, _) => const NormasScreen(),
           ),
           GoRoute(
             path: '/incidentes',
             name: 'incidentes',
-            builder: (_, __) => const IncidentesScreen(),
+            builder: (_, _) => const IncidentesScreen(),
           ),
           GoRoute(
             path: '/incidentes/:id',
@@ -71,44 +71,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/aprobaciones',
             name: 'aprobaciones',
-            builder: (_, __) => const AprobacionesScreen(),
+            builder: (_, _) => const AprobacionesScreen(),
           ),
           GoRoute(
             path: '/evidencias',
             name: 'evidencias',
-            builder: (_, __) => const EvidenciasScreen(),
+            builder: (_, _) => const EvidenciasScreen(),
           ),
           GoRoute(
             path: '/agente',
             name: 'agente',
-            builder: (_, __) => const AgenteScreen(),
+            builder: (_, _) => const AgenteScreen(),
           ),
         ],
       ),
 
       // Client shell — bottom nav with client tabs
       ShellRoute(
-        builder: (_, __, child) => ClienteShell(child: child),
+        builder: (_, _, child) => ClienteShell(child: child),
         routes: [
           GoRoute(
             path: '/portal',
             name: 'portal',
-            builder: (_, __) => const PortalClienteScreen(),
+            builder: (_, _) => const PortalClienteScreen(),
           ),
           GoRoute(
             path: '/portal/capacitaciones',
             name: 'portalCapacitaciones',
-            builder: (_, __) => const CapacitacionesScreen(),
+            builder: (_, _) => const CapacitacionesScreen(),
           ),
           GoRoute(
             path: '/portal/evidencias',
             name: 'portalEvidencias',
-            builder: (_, __) => const EvidenciasScreen(),
+            builder: (_, _) => const EvidenciasScreen(),
           ),
           GoRoute(
             path: '/portal/agente',
             name: 'portalAgente',
-            builder: (_, __) => const AgenteScreen(),
+            builder: (_, _) => const AgenteScreen(),
           ),
         ],
       ),

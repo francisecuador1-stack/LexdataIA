@@ -14,13 +14,11 @@ class NetworkException extends AppException {
 }
 
 class UnauthorizedException extends AppException {
-  const UnauthorizedException([String message = 'Sesión expirada'])
-      : super(message);
+  const UnauthorizedException([super.message = 'Sesión expirada']);
 }
 
 class ForbiddenException extends AppException {
-  const ForbiddenException([String message = 'Sin permisos'])
-      : super(message);
+  const ForbiddenException([super.message = 'Sin permisos']);
 }
 
 class ValidationException extends AppException {
@@ -31,11 +29,9 @@ class ValidationException extends AppException {
 
 class IntegrityException extends AppException {
   const IntegrityException(
-      [String message = 'Error de integridad del hash'])
-      : super(message);
+      [super.message = 'Error de integridad del hash']);
 }
 
 class OfflineException extends AppException {
-  const OfflineException([String message = 'Sin conexión a internet'])
-      : super(message);
+  const OfflineException([super.message = 'Sin conexión a internet']);
 }

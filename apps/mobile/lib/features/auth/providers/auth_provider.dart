@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/auth_models.dart';
+
 
 enum UserRole {
   superadmin,
@@ -86,18 +86,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
     // Simulate API call — will be connected to AuthRepository
     await Future.delayed(const Duration(seconds: 1));
-
-    // Mock: check if MFA is needed (DPO roles require MFA)
-    const mockRequiresMfa = false;
-
-    if (mockRequiresMfa) {
-      state = AsyncData(AuthState(
-        requiresMfa: true,
-        mfaToken: 'mock_mfa_token',
-        email: email,
-      ));
-      return;
-    }
 
     _completeLogin(
       userId: 'usr_001',

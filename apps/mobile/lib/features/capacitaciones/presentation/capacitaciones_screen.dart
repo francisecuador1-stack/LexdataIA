@@ -412,7 +412,7 @@ class CapacitacionesScreen extends ConsumerWidget {
                 ),
                 Switch(
                   value: true,
-                  activeColor: AppColors.blue600,
+                  activeThumbColor: AppColors.blue600,
                   onChanged: (_) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
