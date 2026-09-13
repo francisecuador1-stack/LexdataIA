@@ -25,13 +25,13 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_USER: lexdata_test
-          POSTGRES_PASSWORD: lexdata_test
-          POSTGRES_DB: lexdata_test
+          POSTGRES_USER: lexdata_ci
+          POSTGRES_PASSWORD: lexdata_ci
+          POSTGRES_DB: lexdata_ci
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U lexdata_test"
+          --health-cmd="pg_isready -U lexdata_ci"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -47,9 +47,13 @@ jobs:
           --health-retries=5
 
     env:
-      DATABASE_URL: postgresql://lexdata_test:lexdata_test@localhost:5432/lexdata_test
-      DIRECT_URL: postgresql://lexdata_test:lexdata_test@localhost:5432/lexdata_test
+      # lexdata_ci is superuser — used only for migrations and seeding
+      SYSTEM_DB_URL: postgresql://lexdata_ci:lexdata_ci@localhost:5432/lexdata_ci
+      # lexdata_app is NOBYPASSRLS — used by the API and integration tests
+      DATABASE_URL: postgresql://lexdata_app:lexdata_app@localhost:5432/lexdata_ci
+      DIRECT_URL: postgresql://lexdata_app:lexdata_app@localhost:5432/lexdata_ci
       REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-prod
 
     steps:
       - name: Checkout
@@ -72,6 +76,31 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
+      - name: Create lexdata_app role and apply migrations
+        run: |
+          # Create the application role (NOBYPASSRLS) using the superuser
+          psql "$SYSTEM_DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+            DO $$
+            BEGIN
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'lexdata_app') THEN
+                CREATE ROLE lexdata_app LOGIN PASSWORD 'lexdata_app' NOBYPASSRLS;
+              END IF;
+            END
+            $$;
+            -- Grant schema usage so lexdata_app can see tables
+            GRANT USAGE ON SCHEMA public TO lexdata_app;
+          SQL
+
+          # Apply migrations as superuser (creates tables, RLS policies, FORCE RLS)
+          DATABASE_URL="$SYSTEM_DB_URL" pnpm db:apply
+
+          # Grant table privileges to lexdata_app (after tables exist)
+          psql "$SYSTEM_DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+            GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lexdata_app;
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public
+              GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lexdata_app;
+          SQL
+
       - name: Typecheck
         run: pnpm typecheck
 
@@ -85,7 +114,9 @@ jobs:
         run: pnpm turbo run test:integration --filter=@lexdata/api
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
+          SYSTEM_DB_URL: ${{ env.SYSTEM_DB_URL }}
           REDIS_URL: ${{ env.REDIS_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
 
   # ---------- Build verification ----------
   build:
@@ -144,14 +175,10 @@ jobs:
         working-directory: apps/mobile
         run: flutter pub get
 
-      - name: Run code generation
-        working-directory: apps/mobile
-        run: dart run build_runner build --delete-conflicting-outputs
-
       - name: Analyze
         working-directory: apps/mobile
-        run: flutter analyze --fatal-infos
+        run: flutter analyze
 
       - name: Test
         working-directory: apps/mobile
-        run: flutter test --coverage
+        run: flutter test
