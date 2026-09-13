@@ -70,14 +70,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
-        run: pnpm db:generate
-
-      - name: Run database migrations
-        run: pnpm --filter @lexdata/api prisma migrate deploy
-
-      - name: Seed database
-        run: pnpm --filter @lexdata/api prisma db seed
+      - name: Apply schema and seed
+        run: pnpm db:reset
 
       - name: Build API
         run: pnpm turbo run build --filter=@lexdata/api

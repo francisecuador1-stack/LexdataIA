@@ -113,18 +113,20 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm db:generate
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
 
-      - name: Verify migration safety (diff check)
+      - name: Verify schema drift (diff check)
         run: |
-          pnpm --filter @lexdata/api prisma migrate diff \
-            --from-migrations ./apps/api/prisma/migrations \
+          npx prisma migrate diff \
+            --from-url "$DATABASE_URL" \
             --to-schema-datamodel ./apps/api/prisma/schema.prisma \
             --exit-code
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
 
-      - name: Deploy migrations
-        run: pnpm --filter @lexdata/api prisma migrate deploy
+      - name: Apply migrations
+        run: pnpm db:apply
         env:
           DATABASE_URL: ${{ secrets.STAGING_DIRECT_URL }}
 
