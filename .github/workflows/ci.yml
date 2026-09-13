@@ -177,8 +177,8 @@ jobs:
 
       - name: Analyze
         working-directory: apps/mobile
-        run: flutter analyze
+        run: flutter analyze --fatal-infos
 
       - name: Test
         working-directory: apps/mobile
-        run: flutter test
+        run: flutter test --coverage
