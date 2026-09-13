@@ -3,6 +3,8 @@ import * as argon2 from 'argon2';
 import { join } from 'path';
 import { sha256, loadAndVerifyCorpus } from '@lexdata/legal-corpus';
 
+const prisma = new PrismaClient();
+
 async function main() {
   console.log('Seeding LEXDATA IA database...');
 
