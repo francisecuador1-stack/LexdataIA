@@ -181,6 +181,9 @@ importers:
       '@lexdata/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@lexdata/legal-corpus':
+        specifier: workspace:*
+        version: link:../../packages/legal-corpus
       '@nestjs/common':
         specifier: ^10.4.0
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
