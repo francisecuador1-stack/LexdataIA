@@ -143,7 +143,7 @@ export class TenantLifecycleService {
       throw new BadRequestException(`Tenant ${tenantId} not found`);
     }
 
-    const t = tenant[0];
+    const t = tenant[0]!;
 
     if (t.estado_eliminacion !== 'DELETION_SCHEDULED') {
       throw new BadRequestException(
