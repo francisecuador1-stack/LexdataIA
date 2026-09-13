@@ -1,198 +1,150 @@
 /**
- * RLS Tenant Isolation — Integration Test
+ * RLS Tenant Isolation — Integration Tests
  *
- * Requires a real Postgres with:
- *   - supabase/migrations applied (schema + FORCE RLS)
- *   - lexdata_app role (NOBYPASSRLS)
- *   - DATABASE_URL pointing to lexdata_app
+ * These tests verify the FULL chain:
+ *   Proxy → withTenantTransaction → SET LOCAL → RLS policies → lexdata_app role
  *
- * CI provides this via the pgvector/pg16 service container.
+ * Requires:
+ *   - DATABASE_URL pointing to lexdata_app (NOBYPASSRLS)
+ *   - SYSTEM_DB_URL pointing to superuser (for seeding)
+ *   - Migrations applied (schema + FORCE RLS)
+ *
+ * CI provides this via pgvector/pg16 service container + the setup step
+ * in ci.yml that creates lexdata_app and applies migrations.
  *
  * Run: pnpm --filter @lexdata/api test:integration -- --testPathPattern=rls
  */
-import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import * as jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
 import { PrismaClient } from '@prisma/client';
+import { PrismaService, TenantContext } from '../../src/prisma/prisma.service';
 
-const JWT_SECRET = process.env['JWT_SECRET'] || 'test-secret-for-ci';
 const DATABASE_URL = process.env['DATABASE_URL'];
+const SYSTEM_DB_URL = process.env['SYSTEM_DB_URL'] || DATABASE_URL;
 
-// Skip if no real database is available
-const describeWithDb = DATABASE_URL?.includes('localhost') ? describe : describe.skip;
+// Skip entirely if no database is available
+const describeWithDb = DATABASE_URL ? describe : describe.skip;
 
-function signToken(tenantId: string, rol = 'DPO_HUMANO'): string {
-  return jwt.sign(
-    { sub: randomUUID(), tenantId, rol, jti: randomUUID() },
-    JWT_SECRET,
-    { expiresIn: '1h' },
-  );
-}
-
-describeWithDb('RLS Tenant Isolation (real Postgres)', () => {
-  let app: INestApplication;
-  let systemPrisma: PrismaClient; // connects as superuser for setup
+describeWithDb('RLS Tenant Isolation (real Postgres, lexdata_app role)', () => {
+  let systemPrisma: PrismaClient; // superuser — for seeding and verification
+  let appPrisma: PrismaService;   // lexdata_app — what the API actually uses
   let tenantAId: string;
   let tenantBId: string;
-  let userAId: string;
-  let userBId: string;
 
   beforeAll(async () => {
-    process.env['JWT_SECRET'] = JWT_SECRET;
-
-    // System-level Prisma for seeding (connects as the DB owner, not lexdata_app)
+    // Superuser connection for seeding (bypasses RLS)
     systemPrisma = new PrismaClient({
-      datasources: {
-        db: { url: process.env['SYSTEM_DB_URL'] || DATABASE_URL },
-      },
+      datasources: { db: { url: SYSTEM_DB_URL } },
     });
+
+    // App connection as lexdata_app (NOBYPASSRLS, subject to RLS)
+    appPrisma = new PrismaService();
 
     // Seed two tenants with their own data
     const tenantA = await systemPrisma.tenant.create({
-      data: { nombre: 'Tenant A (test)', plan: 'test' },
+      data: { nombre: 'RLS-Test Tenant A', plan: 'test' },
     });
     tenantAId = tenantA.id;
 
     const tenantB = await systemPrisma.tenant.create({
-      data: { nombre: 'Tenant B (test)', plan: 'test' },
+      data: { nombre: 'RLS-Test Tenant B', plan: 'test' },
     });
     tenantBId = tenantB.id;
 
-    // Users
-    const argon2 = await import('argon2');
-    const hash = await argon2.hash('test-password');
-
-    const userA = await systemPrisma.user.create({
-      data: {
-        tenantId: tenantAId,
-        email: `test-a-${randomUUID()}@test.ec`,
-        nombre: 'User A',
-        rol: 'DPO_HUMANO',
-        passwordHash: hash,
-      },
-    });
-    userAId = userA.id;
-
-    const userB = await systemPrisma.user.create({
-      data: {
-        tenantId: tenantBId,
-        email: `test-b-${randomUUID()}@test.ec`,
-        nombre: 'User B',
-        rol: 'DPO_HUMANO',
-        passwordHash: hash,
-      },
-    });
-    userBId = userB.id;
-
-    // Seed data for each tenant
+    // Seed clientes for each tenant
     await systemPrisma.cliente.create({
       data: {
         tenantId: tenantAId,
-        razonSocial: 'Empresa Alpha S.A.',
-        ruc: `17${Date.now().toString().slice(-8)}001`,
+        razonSocial: 'Alpha Corp (A)',
+        ruc: `17${randomUUID().replace(/-/g, '').slice(0, 8)}001`,
       },
     });
-
     await systemPrisma.cliente.create({
       data: {
         tenantId: tenantBId,
-        razonSocial: 'Empresa Beta S.A.',
-        ruc: `09${Date.now().toString().slice(-8)}001`,
+        razonSocial: 'Beta Corp (B)',
+        ruc: `09${randomUUID().replace(/-/g, '').slice(0, 8)}001`,
       },
     });
-
-    // Build the NestJS app
-    const { AppModule } = await import('../../src/app.module');
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
-  });
+  }, 30000);
 
   afterAll(async () => {
-    // Cleanup test data
+    // Cleanup via superuser
     await systemPrisma.cliente.deleteMany({
-      where: { tenantId: { in: [tenantAId, tenantBId] } },
-    });
-    await systemPrisma.user.deleteMany({
       where: { tenantId: { in: [tenantAId, tenantBId] } },
     });
     await systemPrisma.tenant.deleteMany({
       where: { id: { in: [tenantAId, tenantBId] } },
     });
     await systemPrisma.$disconnect();
-    await app?.close();
+    await appPrisma.$disconnect();
   });
 
-  it('tenant A sees only its own clientes', async () => {
-    const tokenA = signToken(tenantAId);
+  // ─── THE CRITICAL TEST ─────────────────────────────────────────────
+  // Uses withTenantTransaction directly (no HTTP layer, no where clause).
+  // This test exercises: Proxy → AsyncLocalStorage → SET LOCAL → RLS policies → role.
+  // If SET LOCAL is removed, this test MUST fail (tenant A would see 0 rows).
 
-    const res = await request(app.getHttpServer())
-      .get('/clientes')
-      .set('Authorization', `Bearer ${tokenA}`)
-      .expect(200);
+  it('withTenantTransaction + findMany WITHOUT where: tenant A sees only its own rows', async () => {
+    const ctxA: TenantContext = {
+      tenantId: tenantAId,
+      rol: 'DPO_HUMANO',
+      sub: randomUUID(),
+    };
 
-    // Should see Alpha, not Beta
-    expect(Array.isArray(res.body)).toBe(true);
-    const names = res.body.map((c: any) => c.razonSocial);
-    expect(names).toContain('Empresa Alpha S.A.');
-    expect(names).not.toContain('Empresa Beta S.A.');
-  });
-
-  it('tenant B sees only its own clientes', async () => {
-    const tokenB = signToken(tenantBId);
-
-    const res = await request(app.getHttpServer())
-      .get('/clientes')
-      .set('Authorization', `Bearer ${tokenB}`)
-      .expect(200);
-
-    const names = res.body.map((c: any) => c.razonSocial);
-    expect(names).toContain('Empresa Beta S.A.');
-    expect(names).not.toContain('Empresa Alpha S.A.');
-  });
-
-  it('tenant A cannot access a specific resource of tenant B', async () => {
-    // Find tenant B's cliente ID via system connection
-    const clienteB = await systemPrisma.cliente.findFirst({
-      where: { tenantId: tenantBId },
-    });
-    expect(clienteB).toBeTruthy();
-
-    const tokenA = signToken(tenantAId);
-
-    // Attempt to access B's resource with A's token
-    const res = await request(app.getHttpServer())
-      .get(`/clientes/${clienteB!.id}`)
-      .set('Authorization', `Bearer ${tokenA}`);
-
-    // Should be 404 (RLS hides it) or 403, but NOT 200 with B's data
-    expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(res.body.razonSocial).not.toBe('Empresa Beta S.A.');
-  });
-
-  it('without SET LOCAL, tenant A would see zero rows (FORCE RLS active)', async () => {
-    // This test verifies the mechanism is necessary.
-    // A direct query as lexdata_app WITHOUT set_config should return empty
-    // because FORCE RLS is active and no claims are set.
-    const directPrisma = new PrismaClient({
-      datasources: {
-        db: { url: DATABASE_URL },
-      },
+    const result = await appPrisma.withTenantTransaction(ctxA, async () => {
+      // NO where clause — RLS must do the filtering
+      return appPrisma.cliente.findMany();
     });
 
-    try {
-      // Query without SET LOCAL — should get empty due to FORCE RLS
-      // (lexdata_app has no default tenant context)
-      const result = await directPrisma.cliente.findMany();
-      expect(result).toHaveLength(0);
-    } finally {
-      await directPrisma.$disconnect();
-    }
+    const names = result.map((c) => c.razonSocial);
+    expect(names).toContain('Alpha Corp (A)');
+    expect(names).not.toContain('Beta Corp (B)');
+    expect(result.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('withTenantTransaction + findMany WITHOUT where: tenant B sees only its own rows', async () => {
+    const ctxB: TenantContext = {
+      tenantId: tenantBId,
+      rol: 'DPO_HUMANO',
+      sub: randomUUID(),
+    };
+
+    const result = await appPrisma.withTenantTransaction(ctxB, async () => {
+      return appPrisma.cliente.findMany();
+    });
+
+    const names = result.map((c) => c.razonSocial);
+    expect(names).toContain('Beta Corp (B)');
+    expect(names).not.toContain('Alpha Corp (A)');
+    expect(result.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // ─── NEGATIVE TEST ─────────────────────────────────────────────────
+  // Without SET LOCAL (no tenant context), lexdata_app with FORCE RLS
+  // should see ZERO rows — proves the mechanism is necessary.
+
+  it('without withTenantTransaction, lexdata_app sees zero rows (FORCE RLS)', async () => {
+    // Direct query without SET LOCAL — no tenant context
+    const result = await appPrisma.cliente.findMany();
+    expect(result).toHaveLength(0);
+  });
+
+  // ─── CROSS-TABLE TEST ──────────────────────────────────────────────
+  // Verify isolation works on the tenants table itself (isolated by id = tenant_id)
+
+  it('tenant A only sees its own tenant record', async () => {
+    const ctxA: TenantContext = {
+      tenantId: tenantAId,
+      rol: 'DPO_HUMANO',
+      sub: randomUUID(),
+    };
+
+    const result = await appPrisma.withTenantTransaction(ctxA, async () => {
+      return appPrisma.tenant.findMany();
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe(tenantAId);
+    expect(result[0].nombre).toBe('RLS-Test Tenant A');
   });
 });
