@@ -1,54 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { createHash } from 'crypto';
-import { readFileSync, readdirSync } from 'fs';
-import { parse } from 'yaml';
 import { join } from 'path';
-
-const prisma = new PrismaClient();
-
-function sha256(content: string): string {
-  return createHash('sha256').update(content, 'utf8').digest('hex');
-}
-
-/** Same canonicalize function as packages/legal-corpus/scripts/hash.ts */
-function canonicalize(norma: { codigo: string; version: string; titulo: string; texto_normativo: string }): string {
-  return JSON.stringify({
-    codigo: norma.codigo,
-    version: norma.version,
-    titulo: norma.titulo,
-    texto_normativo: norma.texto_normativo,
-  }, null, 0);
-}
-
-interface NormaYaml {
-  codigo: string;
-  fuente: string;
-  tipo: string;
-  identificador: string;
-  titulo: string;
-  categoria: string;
-  resumen_ejecutivo: string;
-  texto_normativo: string;
-  organismo_emisor: string;
-  fecha_emision: string;
-  version: string;
-  estado: string;
-  fase_phva: string;
-  modulos_relacionados: string[];
-  controles?: Array<{
-    titulo: string;
-    descripcion: string;
-    evidencia_requerida: string;
-    fase_phva: string;
-  }>;
-}
-
-interface LockEntry {
-  codigo: string;
-  hash: string;
-  version: string;
-}
+import { sha256, loadAndVerifyCorpus } from '@lexdata/legal-corpus';
 
 async function main() {
   console.log('Seeding LEXDATA IA database...');
@@ -144,41 +97,13 @@ async function main() {
   // ══════════════════════════════════════════════════════════
 
   const corpusBase = join(__dirname, '..', '..', '..', 'packages', 'legal-corpus');
-  const lockPath = join(corpusBase, 'corpus.lock.json');
-  const lockData: LockEntry[] = JSON.parse(readFileSync(lockPath, 'utf8'));
-  const lockMap = new Map(lockData.map(e => [e.codigo, e]));
+  const { normas: allNormas, lockMap } = loadAndVerifyCorpus(corpusBase);
 
-  // Read all YAML files from corpus/nacional and corpus/internacional
-  const allNormas: NormaYaml[] = [];
-  for (const subdir of ['nacional', 'internacional']) {
-    const dir = join(corpusBase, 'corpus', subdir);
-    let files: string[];
-    try { files = readdirSync(dir).filter(f => f.endsWith('.yaml')); } catch { continue; }
-    for (const file of files) {
-      const content = readFileSync(join(dir, file), 'utf8');
-      const normas: NormaYaml[] = parse(content);
-      allNormas.push(...normas);
-    }
-  }
-
-  // Verify hashes and create normas + controles
   const normaIds: Record<string, string> = {};
   let controlCount = 0;
 
   for (const n of allNormas) {
-    const lockEntry = lockMap.get(n.codigo);
-    if (!lockEntry) {
-      throw new Error(`Norma ${n.codigo} not found in corpus.lock.json`);
-    }
-
-    // Verify hash matches lock file
-    const computedHash = sha256(canonicalize(n));
-    if (computedHash !== lockEntry.hash) {
-      throw new Error(
-        `Hash mismatch for ${n.codigo}: computed=${computedHash}, lock=${lockEntry.hash}. ` +
-        `Run 'pnpm --filter legal-corpus hash' to regenerate the lock file.`
-      );
-    }
+    const lockEntry = lockMap.get(n.codigo)!;
 
     const created = await prisma.norma.create({
       data: {

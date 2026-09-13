@@ -6,104 +6,23 @@
  *   npx tsx packages/legal-corpus/scripts/ingest.ts
  */
 import { PrismaClient } from '@prisma/client';
-import { createHash } from 'crypto';
-import { readFileSync, readdirSync } from 'fs';
-import { parse } from 'yaml';
 import { join } from 'path';
+import { sha256, loadAndVerifyCorpus } from '../src/index.js';
 
 const prisma = new PrismaClient();
 
-function sha256(content: string): string {
-  return createHash('sha256').update(content, 'utf8').digest('hex');
-}
-
-/** Must match packages/legal-corpus/scripts/hash.ts exactly */
-function canonicalize(norma: { codigo: string; version: string; titulo: string; texto_normativo: string }): string {
-  return JSON.stringify({
-    codigo: norma.codigo,
-    version: norma.version,
-    titulo: norma.titulo,
-    texto_normativo: norma.texto_normativo,
-  }, null, 0);
-}
-
-interface NormaYaml {
-  codigo: string;
-  fuente: string;
-  tipo: string;
-  identificador: string;
-  titulo: string;
-  categoria: string;
-  resumen_ejecutivo: string;
-  texto_normativo: string;
-  organismo_emisor: string;
-  fecha_emision: string;
-  version: string;
-  estado: string;
-  fase_phva: string;
-  modulos_relacionados: string[];
-  controles?: Array<{
-    titulo: string;
-    descripcion: string;
-    evidencia_requerida: string;
-    fase_phva: string;
-  }>;
-}
-
-interface LockEntry {
-  codigo: string;
-  hash: string;
-  version: string;
-}
-
 async function main() {
   const corpusBase = join(import.meta.dirname, '..');
-  const lockPath = join(corpusBase, 'corpus.lock.json');
+  const { normas, lockMap } = loadAndVerifyCorpus(corpusBase);
 
-  let lockData: LockEntry[];
-  try {
-    lockData = JSON.parse(readFileSync(lockPath, 'utf8'));
-  } catch {
-    console.error('ERROR: corpus.lock.json not found. Run `pnpm --filter legal-corpus hash` first.');
-    process.exit(1);
-  }
-
-  const lockMap = new Map(lockData.map(e => [e.codigo, e]));
-
-  // Read all YAML files from corpus/nacional and corpus/internacional
-  const allNormas: NormaYaml[] = [];
-  for (const subdir of ['nacional', 'internacional']) {
-    const dir = join(corpusBase, 'corpus', subdir);
-    let files: string[];
-    try { files = readdirSync(dir).filter(f => f.endsWith('.yaml')); } catch { continue; }
-    for (const file of files) {
-      const content = readFileSync(join(dir, file), 'utf8');
-      const normas: NormaYaml[] = parse(content);
-      allNormas.push(...normas);
-    }
-  }
-
-  console.log(`Found ${allNormas.length} normas in YAML files`);
+  console.log(`Found ${normas.length} normas in YAML files`);
 
   let upsertedNormas = 0;
   let upsertedControles = 0;
 
-  for (const n of allNormas) {
-    const lockEntry = lockMap.get(n.codigo);
-    if (!lockEntry) {
-      throw new Error(`Norma ${n.codigo} not found in corpus.lock.json. Run 'pnpm --filter legal-corpus hash' first.`);
-    }
+  for (const n of normas) {
+    const lockEntry = lockMap.get(n.codigo)!;
 
-    // Verify hash matches lock file
-    const computedHash = sha256(canonicalize(n));
-    if (computedHash !== lockEntry.hash) {
-      throw new Error(
-        `Hash mismatch for ${n.codigo}: computed=${computedHash}, lock=${lockEntry.hash}. ` +
-        `YAML content may have changed without running 'pnpm --filter legal-corpus hash'.`
-      );
-    }
-
-    // Upsert norma (idempotent by codigo)
     const norma = await prisma.norma.upsert({
       where: { codigo: n.codigo },
       update: {
@@ -140,11 +59,9 @@ async function main() {
     });
     upsertedNormas++;
 
-    // Upsert associated controles normativos
     if (n.controles) {
       for (const ctrl of n.controles) {
         const ctrlHash = sha256(`${ctrl.titulo}|${ctrl.evidencia_requerida}`);
-        // Use hash as a stable identifier for upsert — find existing by normaId + titulo
         const existing = await prisma.controlNormativo.findFirst({
           where: { normaId: norma.id, titulo: ctrl.titulo },
         });
@@ -180,5 +97,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
