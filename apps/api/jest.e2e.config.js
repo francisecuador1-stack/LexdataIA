@@ -1,3 +1,5 @@
+const { join } = require('path');
+
 /** @type {import('jest').Config} */
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
@@ -7,11 +9,14 @@ module.exports = {
     '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
   },
   // @nestjs/config@12 and @nestjs/throttler@6 ship ESM-only dist.
-  // With pnpm, paths look like node_modules/.pnpm/@nestjs+config@12.../node_modules/@nestjs/config/
-  // so the pattern must match both the .pnpm path and the hoisted path.
   transformIgnorePatterns: [
     '/node_modules/.pnpm/(?!(@nestjs\\+config|@nestjs\\+throttler))',
     '/node_modules/(?!(\\.pnpm|@nestjs/config|@nestjs/throttler))',
   ],
+  // Resolve workspace packages that pnpm symlinks
+  moduleNameMapper: {
+    '^@lexdata/contracts(.*)$': join(__dirname, '../../packages/contracts/src$1'),
+    '^@lexdata/legal-corpus(.*)$': join(__dirname, '../../packages/legal-corpus/src$1'),
+  },
   testEnvironment: 'node',
 };
