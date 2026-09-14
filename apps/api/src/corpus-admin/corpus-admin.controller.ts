@@ -15,6 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CorpusAdminService } from './corpus-admin.service';
+import { ExtractionService } from './extraction/extraction.service';
 
 /**
  * Corpus Admin endpoints — restricted to LEGAL_ADMIN and SUPERADMIN.
@@ -23,7 +24,10 @@ import { CorpusAdminService } from './corpus-admin.service';
 @Controller('corpus/admin')
 @Roles('LEGAL_ADMIN', 'SUPERADMIN')
 export class CorpusAdminController {
-  constructor(private readonly service: CorpusAdminService) {}
+  constructor(
+    private readonly service: CorpusAdminService,
+    private readonly extraction: ExtractionService,
+  ) {}
 
   // ─── Document CRUD ────────────────────────────────────────
 
@@ -82,36 +86,31 @@ export class CorpusAdminController {
     return this.service.deleteDocumento(id, req.user.sub, req.user.tenantId);
   }
 
-  // ─── Extraction (placeholder — PR 3) ─────────────────────
+  // ─── Extraction ────────────────────────────────────────────
 
   @Post('documentos/:id/extraer')
   async extraerDocumento(@Param('id') id: string, @Req() req: any) {
-    // PR 3: enqueue extraction job
-    return { message: 'Extracción disponible en PR 3', documentoId: id };
+    return this.extraction.extraer(id, req.user.sub, req.user.tenantId);
   }
 
   @Get('documentos/:id/articulos')
   async listArticulos(@Param('id') id: string) {
-    // PR 3: return extracted articles
-    return { message: 'Artículos extraídos disponibles en PR 3', documentoId: id };
+    return this.extraction.listArticulos(id);
   }
 
   @Patch('articulos/:id')
-  async updateArticulo(@Param('id') id: string, @Body() body: any) {
-    // PR 3: edit article fields, change status
-    return { message: 'Edición de artículos disponible en PR 3', articuloId: id };
+  async updateArticulo(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    return this.extraction.updateArticulo(id, body, req.user.sub, req.user.tenantId);
   }
 
   @Post('articulos/:id/dividir')
-  async dividirArticulo(@Param('id') id: string) {
-    // PR 3: split article
-    return { message: 'División de artículos disponible en PR 3', articuloId: id };
+  async dividirArticulo(@Param('id') id: string, @Req() req: any) {
+    return this.extraction.dividirArticulo(id, req.user.sub, req.user.tenantId);
   }
 
   @Post('documentos/:id/publicar')
   async publicarDocumento(@Param('id') id: string, @Body() body: { motivoCambio: string }, @Req() req: any) {
-    // PR 3: publish approved articles as Norma + ControlNormativo
-    return { message: 'Publicación disponible en PR 3', documentoId: id };
+    return this.extraction.publicar(id, body.motivoCambio, req.user.sub, req.user.tenantId);
   }
 
   // ─── Indexation (placeholder — PR 4) ──────────────────────
