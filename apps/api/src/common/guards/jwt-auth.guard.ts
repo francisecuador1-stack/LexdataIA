@@ -10,7 +10,12 @@ export interface JwtPayload {
   jti: string;
   iat: number;
   exp: number;
+  mfaSetupRequired?: boolean;
+  mfaVerified?: boolean;
 }
+
+// Routes that partial MFA tokens are allowed to access
+const MFA_SETUP_PATHS = ['/auth/mfa/setup', '/auth/mfa/verify'];
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -35,6 +40,15 @@ export class JwtAuthGuard implements CanActivate {
       if (!secret) throw new Error('JWT_SECRET not configured');
       const payload = jwt.verify(token, secret) as JwtPayload;
       // TODO: Check jti against Redis revocation list
+
+      // Block partial MFA tokens from accessing anything except MFA setup/verify
+      if (payload.mfaSetupRequired) {
+        const requestPath = request.url?.split('?')[0] ?? '';
+        if (!MFA_SETUP_PATHS.some((p) => requestPath.endsWith(p))) {
+          throw new UnauthorizedException('MFA setup required — complete second factor verification');
+        }
+      }
+
       request.user = payload;
       return true;
     } catch {

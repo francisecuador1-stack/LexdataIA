@@ -44,6 +44,23 @@ async function main() {
     },
   });
 
+  // LEGAL_ADMIN user for corpus administration
+  // MFA secret is fixed for reproducible local dev — scan the otpauth URL below
+  const LEGAL_ADMIN_MFA_SECRET = 'JBSWY3DPEHPK3PXP';
+  const legalAdmin = await prisma.user.create({
+    data: {
+      tenantId: tenant.id, email: 'admin@lexdata.ec',
+      nombre: 'Administrador Legal', rol: 'LEGAL_ADMIN',
+      passwordHash: demoHash,
+      mfaEnabled: true,
+      mfaSecret: LEGAL_ADMIN_MFA_SECRET,
+    },
+  });
+  const otpauthUrl = `otpauth://totp/LEXDATA%20IA:admin@lexdata.ec?secret=${LEGAL_ADMIN_MFA_SECRET}&issuer=LEXDATA%20IA`;
+  console.log(`  LEGAL_ADMIN: admin@lexdata.ec / demo-password`);
+  console.log(`  MFA Secret: ${LEGAL_ADMIN_MFA_SECRET}`);
+  console.log(`  OTPAuth URL: ${otpauthUrl}`);
+
   // ══════════════════════════════════════════════════════════
   // 2. CLIENTES (5 empresas del prototipo)
   // ══════════════════════════════════════════════════════════

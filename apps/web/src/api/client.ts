@@ -41,12 +41,59 @@ export async function api<T = unknown>(
   });
 
   if (!res.ok) {
+    // 401 auto-refresh: try refresh once, then retry the original request
+    if (res.status === 401 && !path.includes('/auth/refresh') && !path.includes('/auth/login')) {
+      const refreshed = await tryRefresh();
+      if (refreshed) {
+        // Retry original request with new token
+        headers['Authorization'] = `Bearer ${accessToken}`;
+        const retryRes = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
+        if (retryRes.ok) {
+          if (retryRes.status === 204) return undefined as T;
+          return retryRes.json() as Promise<T>;
+        }
+      }
+      // Refresh failed — trigger logout
+      if (_onAuthFailure) _onAuthFailure();
+    }
+
     const body = await res.json().catch(() => ({ message: res.statusText }));
     throw new ApiError(res.status, body.message ?? 'Error', body.requestId);
   }
 
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
+}
+
+// Callback for auth failure (set by RequireAuth to trigger logout + redirect)
+let _onAuthFailure: (() => void) | null = null;
+export function onAuthFailure(cb: () => void) { _onAuthFailure = cb; }
+
+let _refreshing: Promise<boolean> | null = null;
+
+async function tryRefresh(): Promise<boolean> {
+  // Deduplicate concurrent refresh attempts
+  if (_refreshing) return _refreshing;
+  _refreshing = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return false;
+      const data = await res.json() as { accessToken?: string };
+      if (data.accessToken) {
+        accessToken = data.accessToken;
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      _refreshing = null;
+    }
+  })();
+  return _refreshing;
 }
 
 // Convenience methods
