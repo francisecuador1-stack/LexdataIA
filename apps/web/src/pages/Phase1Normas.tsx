@@ -7,9 +7,9 @@ import { NormativeBanner } from '@/components/ui/NormativeBanner';
 import { HashChip } from '@/components/ui/HashChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useNormas, useMatriz, usePrincipios, useCorpusStats } from '@/hooks/useCorpus';
+import { useAuth } from '@/stores/useAuth';
+import { CorpusAdminTab } from '@/components/corpus-admin/CorpusAdminTab';
 import { BookOpen, Search } from 'lucide-react';
-
-// Badges are computed dynamically from useCorpusStats() — see below
 
 export function Phase1Normas() {
   const [tab, setTab] = useState('biblioteca');
@@ -21,11 +21,16 @@ export function Phase1Normas() {
   const { data: matriz } = useMatriz();
   const { data: principios } = usePrincipios();
   const { data: stats } = useCorpusStats();
+  const { user } = useAuth();
+
+  const isAdmin = user?.rol === 'LEGAL_ADMIN' || user?.rol === 'SUPERADMIN';
 
   const tabs = [
     { key: 'biblioteca', label: 'Biblioteca Jurídica', badge: stats ? `${stats.nacionales}N · ${stats.internacionales}I` : '—' },
     { key: 'matriz', label: 'Matriz Normativa', badge: 'API · RN-004' },
     { key: 'principios', label: 'Principios Rectores', badge: String(stats?.controles ?? '—') },
+    // §8.1: Solo visible para LEGAL_ADMIN / SUPERADMIN (defensa en profundidad)
+    ...(isAdmin ? [{ key: 'administracion', label: 'Administración del Corpus', badge: 'LEGAL_ADMIN' }] : []),
   ];
 
   return (
@@ -209,6 +214,8 @@ export function Phase1Normas() {
             </div>
           </div>
         )}
+
+        {tab === 'administracion' && isAdmin && <CorpusAdminTab />}
       </div>
     </div>
   );
