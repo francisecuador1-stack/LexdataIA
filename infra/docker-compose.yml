@@ -55,6 +55,7 @@ services:
       mc mb --ignore-existing local/evidencias;
       mc mb --ignore-existing local/documentos;
       mc mb --ignore-existing local/certificados;
+      mc mb --ignore-existing local/corpus-fuentes;
       echo 'Buckets created';
       "
 

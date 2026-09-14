@@ -9,11 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useNormas, useMatriz, usePrincipios, useCorpusStats } from '@/hooks/useCorpus';
 import { BookOpen, Search } from 'lucide-react';
 
-const TABS = [
-  { key: 'biblioteca', label: 'Biblioteca Jurídica', badge: '28N · 8I' },
-  { key: 'matriz', label: 'Matriz Normativa', badge: 'API · RN-004' },
-  { key: 'principios', label: 'Principios Rectores', badge: '13' },
-];
+// Badges are computed dynamically from useCorpusStats() — see below
 
 export function Phase1Normas() {
   const [tab, setTab] = useState('biblioteca');
@@ -26,6 +22,12 @@ export function Phase1Normas() {
   const { data: principios } = usePrincipios();
   const { data: stats } = useCorpusStats();
 
+  const tabs = [
+    { key: 'biblioteca', label: 'Biblioteca Jurídica', badge: stats ? `${stats.nacionales}N · ${stats.internacionales}I` : '—' },
+    { key: 'matriz', label: 'Matriz Normativa', badge: 'API · RN-004' },
+    { key: 'principios', label: 'Principios Rectores', badge: String(stats?.controles ?? '—') },
+  ];
+
   return (
     <div>
       <ModuleHeader
@@ -36,7 +38,7 @@ export function Phase1Normas() {
         badges={[{ label: 'RN-004', variant: 'blue' }]}
       />
 
-      <TabBar tabs={TABS} activeKey={tab} onChange={setTab} />
+      <TabBar tabs={tabs} activeKey={tab} onChange={setTab} />
 
       <div className="mt-6">
         {tab === 'biblioteca' && (
@@ -49,13 +51,13 @@ export function Phase1Normas() {
                   onClick={() => setTipo('NACIONAL')}
                   className={`rounded-lg px-3 py-1 text-xs font-medium ${tipo === 'NACIONAL' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`}
                 >
-                  Nacional ({stats?.nacionales ?? 28})
+                  Nacional ({stats?.nacionales ?? '—'})
                 </button>
                 <button
                   onClick={() => setTipo('INTERNACIONAL')}
                   className={`rounded-lg px-3 py-1 text-xs font-medium ${tipo === 'INTERNACIONAL' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`}
                 >
-                  Internacional ({stats?.internacionales ?? 8})
+                  Internacional ({stats?.internacionales ?? '—'})
                 </button>
               </div>
 
@@ -78,10 +80,13 @@ export function Phase1Normas() {
                     onClick={() => setSelectedNorma(n)}
                     className={`w-full rounded-lg border p-3 text-left transition ${selectedNorma?.id === n.id ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                   >
-                    <div className="mb-1 flex items-center gap-2">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
                       <Badge variant={n.fuente?.toLowerCase() as any ?? 'slate'}>{n.fuente}</Badge>
                       <span className="text-xs font-medium text-slate-700">{n.identificador}</span>
                       <Badge variant="vigente">Vigente</Badge>
+                      {n.textoVerificado === false && (
+                        <Badge variant="pendiente">Texto pendiente de verificación</Badge>
+                      )}
                     </div>
                     <div className="text-sm font-medium text-slate-800">{n.titulo}</div>
                     <div className="text-[10px] text-slate-500">{n.categoria}</div>
@@ -111,6 +116,11 @@ export function Phase1Normas() {
 
                   <div className="mb-4">
                     <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600">Texto normativo</h4>
+                    {selectedNorma.textoVerificado === false && (
+                      <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                        Texto pendiente de verificación — el contenido normativo aún no está cargado.
+                      </div>
+                    )}
                     <p className="text-sm text-slate-600">{selectedNorma.textoNormativo}</p>
                   </div>
 
@@ -158,8 +168,8 @@ export function Phase1Normas() {
         {tab === 'matriz' && (
           <div>
             <NormativeBanner tone="legal">
-              RN-004 · Matriz Normativa — API Interna del Sistema. Esta matriz es la fuente de conocimiento única del SGPDP.
-              Los controles aquí definidos son inmutables por el operador.
+              RN-004 · Matriz Normativa — API Interna del Sistema. Los controles son inmutables para operadores.
+              Solo LEGAL_ADMIN puede versionar el corpus, con traza de auditoría.
             </NormativeBanner>
             <DataTable
               columns={[
