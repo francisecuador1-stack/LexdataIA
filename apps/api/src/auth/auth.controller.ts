@@ -57,6 +57,26 @@ export class AuthController {
     return this.auth.me(user.sub);
   }
 
+  @Public()
+  @Post('google')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  @HttpCode(200)
+  async loginWithGoogle(
+    @Body() body: { idToken: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.auth.loginWithGoogle(body.idToken);
+    if ('refreshToken' in result && result.refreshToken) {
+      res.cookie('refresh_token', result.refreshToken, {
+        httpOnly: true, secure: process.env['NODE_ENV'] === 'production',
+        sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000, path: '/auth/refresh',
+      });
+      const { refreshToken, ...rest } = result;
+      return rest;
+    }
+    return result;
+  }
+
   @Post('mfa/setup')
   async setupMfa(@Req() req: Request) {
     const user = (req as any).user;

@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { post, setAccessToken, ApiError } from '@/api/client';
 import { useAuth } from '@/stores/useAuth';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
 
 interface LoginResponse {
   user: {
@@ -37,6 +39,66 @@ export function Login() {
   });
 
   const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/dashboard';
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+
+  // Google Sign-In callback
+  const handleGoogleCredential = useCallback(async (response: { credential: string }) => {
+    setError(null);
+    setSuccessMsg(null);
+    setLoading(true);
+
+    try {
+      const data = await post<LoginResponse>('/auth/google', { idToken: response.credential });
+
+      if (data.mfaSetupRequired) {
+        if (data.accessToken) setAccessToken(data.accessToken);
+        navigate('/mfa-setup', { state: {} });
+        return;
+      }
+
+      // If MFA required (user has MFA enabled), need TOTP code
+      if ((data as any).mfaRequired) {
+        if (data.accessToken) setAccessToken(data.accessToken);
+        setNeedsMfa(true);
+        setError('Ingresa el código de tu aplicación de autenticación.');
+        return;
+      }
+
+      login(data.user, data.accessToken);
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Error al iniciar sesión con Google.');
+    } finally {
+      setLoading(false);
+    }
+  }, [from, login, navigate]);
+
+  // Load Google Identity Services script
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || !googleBtnRef.current) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = () => {
+      const google = (window as any).google;
+      if (!google?.accounts?.id) return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+      });
+      google.accounts.id.renderButton(googleBtnRef.current, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        width: '100%',
+        text: 'signin_with',
+        locale: 'es',
+      });
+    };
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [handleGoogleCredential]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -180,6 +242,18 @@ export function Login() {
             {loading ? 'Verificando...' : needsMfa ? 'Verificar código' : 'Iniciar sesión'}
           </button>
         </form>
+
+        {/* Google Sign-In */}
+        {GOOGLE_CLIENT_ID && (
+          <>
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs text-slate-400">o</span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+            <div ref={googleBtnRef} className="flex justify-center" />
+          </>
+        )}
 
         <p className="mt-6 text-center text-xs text-slate-400">
           LOPDP Ecuador &middot; SGPDP &middot; COGNITEX
