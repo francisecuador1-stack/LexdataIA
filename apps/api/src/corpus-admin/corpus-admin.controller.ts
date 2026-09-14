@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CorpusAdminService } from './corpus-admin.service';
 import { ExtractionService } from './extraction/extraction.service';
+import { HybridSearchService } from './search/hybrid-search.service';
 
 /**
  * Corpus Admin endpoints — restricted to LEGAL_ADMIN and SUPERADMIN.
@@ -27,6 +28,7 @@ export class CorpusAdminController {
   constructor(
     private readonly service: CorpusAdminService,
     private readonly extraction: ExtractionService,
+    private readonly search: HybridSearchService,
   ) {}
 
   // ─── Document CRUD ────────────────────────────────────────
@@ -113,12 +115,11 @@ export class CorpusAdminController {
     return this.extraction.publicar(id, body.motivoCambio, req.user.sub, req.user.tenantId);
   }
 
-  // ─── Indexation (placeholder — PR 4) ──────────────────────
+  // ─── Indexation ────────────────────────────────────────────
 
   @Post('indexar')
-  async indexar(@Body() body: { normaIds?: string[]; forzar?: boolean }, @Req() req: any) {
-    // PR 4: enqueue chunking + embeddings
-    return { message: 'Indexación disponible en PR 4' };
+  async indexar(@Body() body: { normaIds?: string[]; forzar?: boolean }) {
+    return this.search.indexar(body.normaIds, body.forzar);
   }
 
   // ─── Index status ─────────────────────────────────────────

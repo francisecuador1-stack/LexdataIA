@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { HybridSearchService } from '../corpus-admin/search/hybrid-search.service';
 
 export interface CitaNormativa {
   codigo: string;
@@ -19,18 +20,45 @@ export interface ChunkResult {
 
 @Injectable()
 export class CorpusRetriever {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() @Inject(HybridSearchService) private readonly hybridSearch?: HybridSearchService,
+  ) {}
 
   /**
-   * Hybrid search: text search + RRF ranking.
-   * TODO: Add vector search with pgvector when embeddings are populated.
+   * buscar_normativa — §7.5: herramienta expuesta a MARK AI.
+   * Uses hybrid search (semantic + lexical + RRF) when available.
    */
   async buscar(query: string, filtros?: {
     fuente?: string;
     tipo?: string;
     fasePHVA?: string;
   }, topK: number = 8): Promise<ChunkResult[]> {
-    // Text search across normas
+    // Use hybrid search when available (§7.5)
+    if (this.hybridSearch) {
+      try {
+        const result = await this.hybridSearch.buscar(query, { limit: topK });
+        return result.data.map((r) => ({
+          contenido: r.chunk
+            ? `${r.chunk.encabezado ?? r.norma.identificador}\n${r.chunk.extracto}`
+            : `${r.norma.identificador} — ${r.norma.titulo}`,
+          metadata: { normaId: r.norma.id, fuente: r.norma.fuente, tipo: r.norma.tipo },
+          cita: {
+            codigo: r.norma.codigo,
+            identificador: r.norma.identificador,
+            titulo: r.norma.titulo,
+            hash: '',
+            fuente: r.norma.fuente,
+            fasePHVA: r.norma.fasePHVA,
+          },
+          score: r.score,
+        }));
+      } catch {
+        // Fall through to legacy search
+      }
+    }
+
+    // Fallback: text search across normas
     const normas = await this.prisma.norma.findMany({
       where: {
         AND: [
