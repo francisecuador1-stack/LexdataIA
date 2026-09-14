@@ -54,7 +54,8 @@ export function useExtraer() {
     mutationFn: (documentoId: string) =>
       post<any>(`/corpus/admin/documentos/${documentoId}/extraer`),
     onSuccess: (_, documentoId) => {
-      qc.invalidateQueries({ queryKey: ['corpus-admin', 'documentos', documentoId] });
+      qc.invalidateQueries({ queryKey: ['corpus-admin', 'documentos'] }); // Refresh list + detail
+      qc.invalidateQueries({ queryKey: ['corpus-admin', 'indice'] }); // Refresh KPIs
     },
   });
 }
