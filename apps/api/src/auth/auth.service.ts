@@ -158,6 +158,95 @@ export class AuthService {
     return { message: 'MFA habilitado exitosamente' };
   }
 
+  /**
+   * Login or register via Google ID token.
+   * Verifies the token with Google's tokeninfo endpoint,
+   * then finds or creates the user.
+   */
+  async loginWithGoogle(idToken: string) {
+    const googleClientId = process.env['GOOGLE_CLIENT_ID'];
+    if (!googleClientId) throw new BadRequestException('Google login no configurado');
+
+    // Verify token with Google
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+    if (!res.ok) throw new UnauthorizedException('Token de Google inválido');
+
+    const payload = await res.json() as {
+      sub: string;
+      email: string;
+      name: string;
+      email_verified: string;
+      aud: string;
+    };
+
+    // Verify audience matches our client ID
+    if (payload.aud !== googleClientId) {
+      throw new UnauthorizedException('Token de Google no corresponde a esta aplicación');
+    }
+    if (payload.email_verified !== 'true') {
+      throw new UnauthorizedException('El correo de Google no está verificado');
+    }
+
+    // Find existing user by email
+    let user = await this.prisma.user.findUnique({ where: { email: payload.email } });
+
+    if (!user) {
+      // No automatic registration — user must exist in the system
+      throw new UnauthorizedException(
+        'No existe una cuenta asociada a este correo. Contacte al administrador.',
+      );
+    }
+
+    if (!user.activo) throw new UnauthorizedException('Cuenta desactivada');
+
+    // Google login bypasses password but NOT MFA if already enabled
+    const requiresMfa = MFA_REQUIRED_ROLES.includes(user.rol);
+
+    if (requiresMfa && !user.mfaEnabled) {
+      const partialJti = randomUUID();
+      const partialToken = jwt.sign(
+        { sub: user.id, tenantId: user.tenantId, rol: user.rol, jti: partialJti, mfaSetupRequired: true },
+        this.jwtSecret,
+        { expiresIn: '10m' },
+      );
+      return { accessToken: partialToken, mfaSetupRequired: true, requiresMfa: true };
+    }
+
+    // If MFA is enabled, Google login alone is not enough — return partial token for TOTP
+    if (user.mfaEnabled) {
+      const partialJti = randomUUID();
+      const partialToken = jwt.sign(
+        { sub: user.id, tenantId: user.tenantId, rol: user.rol, jti: partialJti, mfaRequired: true },
+        this.jwtSecret,
+        { expiresIn: '10m' },
+      );
+      return { accessToken: partialToken, mfaRequired: true };
+    }
+
+    // No MFA required — full session
+    const jti = randomUUID();
+    const tokenPayload: TokenPayload = {
+      sub: user.id,
+      tenantId: user.tenantId,
+      rol: user.rol,
+      jti,
+    };
+
+    const accessToken = this.signAccessToken(tokenPayload);
+    const refreshToken = this.signRefreshToken({ sub: user.id, jti });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { ultimoAcceso: new Date() },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol, tenantId: user.tenantId },
+    };
+  }
+
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return { message: 'Si el correo existe, recibirá un enlace de recuperación' };
