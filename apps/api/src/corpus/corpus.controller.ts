@@ -51,7 +51,13 @@ export class CorpusController {
   }
 
   @Get('buscar')
-  buscar(@Query('q') q: string) { return this.service.buscar(q); }
+  buscar(
+    @Query('q') q: string,
+    @Query('modo') modo?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.buscar(q, modo, limit ? parseInt(limit, 10) : undefined);
+  }
 
   // Block writes for non-LEGAL_ADMIN (RN-004)
   @Patch('normas/:id')

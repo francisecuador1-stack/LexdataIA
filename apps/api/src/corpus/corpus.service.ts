@@ -1,10 +1,14 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { HybridSearchService } from '../corpus-admin/search/hybrid-search.service';
 
 @Injectable()
 export class CorpusService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() @Inject(HybridSearchService) private readonly hybridSearch?: HybridSearchService,
+  ) {}
 
   async listNormas(params: {
     tipo?: string; fuente?: string; fasePHVA?: string;
@@ -117,9 +121,15 @@ export class CorpusService {
     return this.prisma.normaVista.create({ data: { tenantId, usuarioId, normaId } });
   }
 
-  async buscar(q: string) {
-    // Text search using Prisma contains (for now)
-    // TODO: Implement hybrid vector + tsvector search with RRF
+  async buscar(q: string, modo?: string, limit?: number) {
+    if (this.hybridSearch) {
+      return this.hybridSearch.buscar(q, {
+        modo: (modo as 'hibrida' | 'semantica' | 'lexica') ?? undefined,
+        limit,
+      });
+    }
+
+    // Fallback: text search using Prisma contains (if HybridSearchService not injected)
     const normas = await this.prisma.norma.findMany({
       where: {
         OR: [
@@ -130,9 +140,9 @@ export class CorpusService {
         ],
       },
       include: { controlesNormativos: true },
-      take: 10,
+      take: limit ?? 10,
     });
-    return { data: normas, total: normas.length };
+    return { modo: 'lexica' as const, data: normas, total: normas.length };
   }
 
   async getStats() {
