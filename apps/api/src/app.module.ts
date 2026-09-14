@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { CorpusModule } from './corpus/corpus.module';
+import { CorpusAdminModule } from './corpus-admin/corpus-admin.module';
 import { Fase2Module } from './fase2/fase2.module';
 import { Fase3Module } from './fase3/fase3.module';
 import { Fase4Module } from './fase4/fase4.module';
@@ -36,6 +37,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     TenantsModule,
     ClientesModule,
     CorpusModule,
+    CorpusAdminModule,
     Fase2Module,
     Fase3Module,
     Fase4Module,
