@@ -3,6 +3,9 @@ dist/
 .turbo/
 *.tsbuildinfo
 
+# Local storage (corpus documents)
+.storage/
+
 # Environment
 .env
 .env.local

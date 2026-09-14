@@ -34,7 +34,12 @@ export class CorpusAdminController {
   // ─── Document CRUD ────────────────────────────────────────
 
   @Post('documentos')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: (parseInt(process.env['CORPUS_MAX_UPLOAD_MB'] ?? '50', 10)) * 1024 * 1024,
+      files: 1,
+    },
+  }))
   async uploadDocumento(
     @UploadedFile() file: Express.Multer.File | undefined,
     @Body() body: { fuente: string; tipo: string; organismoEmisor: string; fechaPublicacion?: string; registroOficial?: string },
@@ -91,8 +96,12 @@ export class CorpusAdminController {
   // ─── Extraction ────────────────────────────────────────────
 
   @Post('documentos/:id/extraer')
-  async extraerDocumento(@Param('id') id: string, @Req() req: any) {
-    return this.extraction.extraer(id, req.user.sub, req.user.tenantId);
+  async extraerDocumento(
+    @Param('id') id: string,
+    @Body() body: { forzar?: boolean } | undefined,
+    @Req() req: any,
+  ) {
+    return this.extraction.extraer(id, req.user.sub, req.user.tenantId, body?.forzar);
   }
 
   @Get('documentos/:id/articulos')
