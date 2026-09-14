@@ -38,13 +38,7 @@ export function verificarFidelidad(
   const normExtracto = normalizar(extracto);
   const normFuente = normalizar(fuenteCompleta);
 
-  // Direct substring match
-  if (normFuente.includes(normExtracto)) return true;
-
-  // If the full segment doesn't match, try the first 200 chars
-  // (title + first paragraph) — the rest may have formatting artifacts
-  const head = normExtracto.slice(0, 200);
-  if (head.length >= 50 && normFuente.includes(head)) return true;
-
-  return false;
+  // Full substring match required — no partial fallback
+  // (D.5: the 200-char head fallback allowed fabricated body text to pass)
+  return normFuente.includes(normExtracto);
 }

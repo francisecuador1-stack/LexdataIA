@@ -301,12 +301,18 @@ export class CorpusAdminService {
       return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
-    // TXT: allow if all bytes are printable ASCII/UTF-8 (heuristic)
-    const sample = buffer.subarray(0, Math.min(512, buffer.length));
-    const isPrintable = sample.every(
-      (b) => (b >= 0x20 && b <= 0x7e) || b === 0x0a || b === 0x0d || b === 0x09 || b >= 0xc0,
-    );
-    if (isPrintable) return 'text/plain';
+    // TXT: validate as strict UTF-8 (fixes D.1 — old check rejected 0x80-0xBF continuation bytes)
+    try {
+      const decoder = new TextDecoder('utf-8', { fatal: true });
+      const sample = buffer.subarray(0, Math.min(4096, buffer.length));
+      const text = decoder.decode(sample);
+      // Reject if it looks like a script/binary (basic sanity)
+      if (text.includes('<script') || text.includes('#!/')) return null;
+      // Must have some printable content
+      if (text.replace(/\s/g, '').length > 10) return 'text/plain';
+    } catch {
+      // Not valid UTF-8
+    }
 
     return null;
   }

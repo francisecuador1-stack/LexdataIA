@@ -71,17 +71,16 @@ describe('verificarFidelidad', () => {
     expect(verificarFidelidad(extracto, fuente)).toBe(false);
   });
 
-  it('accepts matching head (first 200 chars) even if tail differs', () => {
-    // This tests the fallback: if the first ~200 normalized chars match,
-    // it passes even if the rest has formatting artifacts.
-    // We use a substantial prefix that's definitely > 50 chars after normalization.
+  it('rejects text with matching head but fabricated body (D.5 fix)', () => {
+    // D.5: the old head fallback allowed fabricated body text to pass.
+    // Now requires full substring match.
     const extracto =
       'Art. 7.- Consentimiento del titular. El tratamiento de datos personales ' +
       'requiere el consentimiento libre, específico, informado e inequívoco ' +
       'del titular de los datos personales. El consentimiento deberá ser ' +
       'manifestación de voluntad libre, otorgada de manera inequívoca. ' +
-      '\n\n[ARTEFACTO: este texto no existe en el documento fuente y rompe la coincidencia completa]';
+      '\n\n[ARTEFACTO: este texto no existe en el documento fuente]';
 
-    expect(verificarFidelidad(extracto, fuente)).toBe(true);
+    expect(verificarFidelidad(extracto, fuente)).toBe(false);
   });
 });
