@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -127,6 +128,7 @@ export class CorpusAdminController {
   // ─── Indexation ────────────────────────────────────────────
 
   @Post('indexar')
+  @HttpCode(202)
   async indexar(@Body() body: { normaIds?: string[]; forzar?: boolean }) {
     return this.search.indexar(body.normaIds, body.forzar);
   }

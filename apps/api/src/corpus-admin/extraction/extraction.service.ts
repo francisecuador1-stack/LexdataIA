@@ -483,8 +483,11 @@ export class ExtractionService {
             hashSha256,
             textoVerificado: true,
             fuenteDocumentoId: documentoId,
+            indexadoAt: null, // Reset — needs re-indexation with new text
           },
         });
+        // Delete old chunks so reindex picks up changes
+        await this.prisma.corpusChunk.deleteMany({ where: { normaId: existing.id } });
         normasActualizadas.push(existing.id);
       } else {
         // Create new norma
