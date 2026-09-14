@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../common/decorators/roles.decorator';
+import { SkipTenantContext } from '../common/decorators/skip-tenant.decorator';
 import { CorpusAdminService } from './corpus-admin.service';
 import { ExtractionService } from './extraction/extraction.service';
 import { HybridSearchService } from './search/hybrid-search.service';
@@ -22,9 +23,11 @@ import { HybridSearchService } from './search/hybrid-search.service';
 /**
  * Corpus Admin endpoints — restricted to LEGAL_ADMIN and SUPERADMIN.
  * RN-004: all actions are audited. The corpus is global (not tenant-scoped).
+ * @SkipTenantContext — these tables don't have tenant_id; RLS uses rol from JWT claims.
  */
 @Controller('corpus/admin')
 @Roles('LEGAL_ADMIN', 'SUPERADMIN')
+@SkipTenantContext()
 export class CorpusAdminController {
   constructor(
     private readonly service: CorpusAdminService,
@@ -51,21 +54,26 @@ export class CorpusAdminController {
       throw new BadRequestException('Campos obligatorios: fuente, tipo, organismoEmisor');
     }
 
-    return this.service.uploadDocumento({
-      file: {
-        buffer: file.buffer,
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-      },
-      fuente: body.fuente,
-      tipo: body.tipo,
-      organismoEmisor: body.organismoEmisor,
-      fechaPublicacion: body.fechaPublicacion,
-      registroOficial: body.registroOficial,
-      userId: req.user.sub,
-      tenantId: req.user.tenantId,
-    });
+    try {
+      return await this.service.uploadDocumento({
+        file: {
+          buffer: file.buffer,
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+        },
+        fuente: body.fuente,
+        tipo: body.tipo,
+        organismoEmisor: body.organismoEmisor,
+        fechaPublicacion: body.fechaPublicacion,
+        registroOficial: body.registroOficial,
+        userId: req.user.sub,
+        tenantId: req.user.tenantId,
+      });
+    } catch (err) {
+      console.error('[CorpusAdmin] uploadDocumento FULL ERROR:', err);
+      throw err;
+    }
   }
 
   @Get('documentos')
@@ -73,10 +81,15 @@ export class CorpusAdminController {
     @Query('limit') limit?: string,
     @Query('cursor') cursor?: string,
   ) {
-    return this.service.listDocumentos({
-      limit: limit ? parseInt(limit, 10) : undefined,
-      cursor,
-    });
+    try {
+      return await this.service.listDocumentos({
+        limit: limit ? parseInt(limit, 10) : undefined,
+        cursor,
+      });
+    } catch (err) {
+      console.error('[CorpusAdmin] listDocumentos error:', err);
+      throw err;
+    }
   }
 
   @Get('documentos/:id')

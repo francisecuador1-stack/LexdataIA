@@ -5,7 +5,7 @@
  * Keys derived from SHA-256 hash — never from user-provided filenames.
  */
 
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { mkdir, writeFile, readFile, unlink, access } from 'fs/promises';
 
 export interface StorageProvider {
@@ -28,8 +28,7 @@ export class LocalStorageProvider implements StorageProvider {
 
   async put(key: string, buffer: Buffer, _mime: string): Promise<void> {
     const filePath = this.resolvePath(key);
-    const dir = filePath.substring(0, filePath.lastIndexOf('/'));
-    await mkdir(dir, { recursive: true });
+    await mkdir(dirname(filePath), { recursive: true });
     await writeFile(filePath, buffer);
   }
 

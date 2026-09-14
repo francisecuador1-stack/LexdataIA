@@ -7,6 +7,7 @@ import {
 import { Observable, from } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { SKIP_TENANT_KEY } from '../decorators/skip-tenant.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
@@ -39,6 +40,13 @@ export class TenantContextInterceptor implements NestInterceptor {
       context.getClass(),
     ]);
     if (isPublic) return next.handle();
+
+    // Global resources (corpus admin) skip tenant transaction
+    const skipTenant = this.reflector.getAllAndOverride<boolean>(SKIP_TENANT_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skipTenant) return next.handle();
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
