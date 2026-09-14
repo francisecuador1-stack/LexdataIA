@@ -7,6 +7,7 @@ import {
 import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { createStorageProvider, type StorageProvider } from './storage/storage-provider';
 
 // RN-004: Magic bytes for allowed file types
 const MAGIC_BYTES: Record<string, Buffer> = {
@@ -35,10 +36,14 @@ interface UploadInput {
 
 @Injectable()
 export class CorpusAdminService {
+  private readonly storage: StorageProvider;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-  ) {}
+  ) {
+    this.storage = createStorageProvider();
+  }
 
   /**
    * Upload a source document (PDF/DOCX/TXT).
@@ -61,9 +66,9 @@ export class CorpusAdminService {
     // Compute SHA-256 of the binary
     const hashSha256 = createHash('sha256').update(file.buffer).digest('hex');
 
-    // Reject duplicate by hash (409 Conflict)
+    // Reject duplicate by hash (409 Conflict) — exclude soft-deleted (RECHAZADO)
     const existing = await this.prisma.normaFuenteDocumento.findFirst({
-      where: { hashSha256 },
+      where: { hashSha256, estado: { not: 'RECHAZADO' } },
     });
     if (existing) {
       throw new ConflictException(`Documento ya cargado (SHA-256: ${hashSha256.slice(0, 12)}…). ID: ${existing.id}`);
@@ -74,12 +79,16 @@ export class CorpusAdminService {
       .replace(/[^a-zA-Z0-9._-]/g, '_')
       .slice(0, 200);
 
-    // Store in Supabase Storage / MinIO
-    const storageKey = `corpus-fuentes/${Date.now()}_${safeFilename}`;
+    // Storage key derived from hash — never from user-provided filename
+    const storageKey = `${hashSha256.slice(0, 8)}/${hashSha256}`;
 
-    // TODO: Actually upload to storage provider (MinIO/Supabase)
-    // For now, we store the key and the document metadata.
-    // The actual upload will be wired when storage client is available.
+    // Upload to storage provider
+    await this.storage.put(storageKey, file.buffer, detectedMime);
+
+    // For TXT files, also store textoPlano immediately
+    const textoPlano = detectedMime === 'text/plain'
+      ? file.buffer.toString('utf-8').replace(/^\uFEFF/, '') // Strip BOM
+      : null;
 
     const documento = await this.prisma.normaFuenteDocumento.create({
       data: {
@@ -94,6 +103,7 @@ export class CorpusAdminService {
         fechaPublicacion: fechaPublicacion ? new Date(fechaPublicacion) : null,
         registroOficial: registroOficial ?? null,
         subidoPorId: userId,
+        textoPlano,
       },
     });
 
@@ -117,6 +127,7 @@ export class CorpusAdminService {
   async listDocumentos(params: { limit?: number; cursor?: string }) {
     const take = Math.min(params.limit ?? 20, 100);
     const items = await this.prisma.normaFuenteDocumento.findMany({
+      where: { estado: { not: 'RECHAZADO' } }, // Exclude soft-deleted
       take: take + 1,
       ...(params.cursor ? { cursor: { id: params.cursor }, skip: 1 } : {}),
       orderBy: { createdAt: 'desc' },
@@ -173,14 +184,12 @@ export class CorpusAdminService {
     });
     if (!doc) throw new NotFoundException('Documento no encontrado');
 
-    // TODO: Generate signed URL from MinIO/Supabase Storage
-    // For now return the storage key — the actual signed URL generation
-    // will be wired when storage client is available.
+    const url = await this.storage.getSignedUrl(doc.storageKey, 900);
     return {
-      url: `/storage/${doc.storageKey}`,
+      url,
       mimeType: doc.mimeType,
       nombreArchivo: doc.nombreArchivo,
-      expiresIn: 900, // 15 minutes
+      expiresIn: 900,
     };
   }
 

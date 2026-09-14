@@ -7,15 +7,20 @@ import {
 import { createHash } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../../audit/audit.service';
+import { createStorageProvider, type StorageProvider } from '../storage/storage-provider';
 import { segmentar } from './segmentador';
 import { verificarFidelidad } from './verificador-fidelidad';
 
 @Injectable()
 export class ExtractionService {
+  private readonly storage: StorageProvider;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-  ) {}
+  ) {
+    this.storage = createStorageProvider();
+  }
 
   /**
    * Run extraction synchronously on a document.
@@ -24,7 +29,7 @@ export class ExtractionService {
    *
    * §6 steps 1-5
    */
-  async extraer(documentoId: string, userId: string, tenantId: string) {
+  async extraer(documentoId: string, userId: string, tenantId: string, forzar = false) {
     const doc = await this.prisma.normaFuenteDocumento.findUnique({
       where: { id: documentoId },
     });
@@ -61,29 +66,23 @@ export class ExtractionService {
         data: { estado: 'EXTRAYENDO' },
       });
 
-      // Step 1: Get plain text
-      // For now, use textoPlano if already set, otherwise the document
-      // needs PDF extraction (will be done in worker with pdfjs-dist)
+      // Step 1: Get plain text — extract from the stored file
       let textoPlano = doc.textoPlano;
       if (!textoPlano) {
-        if (doc.mimeType === 'text/plain') {
-          // TXT: textoPlano should have been stored at upload time
-          // For now we leave a placeholder
-          textoPlano = '';
-        } else {
-          // PDF/DOCX: requires external extraction (pdfjs-dist / mammoth)
-          // For now store a note; the worker will handle this
+        const buffer = await this.storage.get(doc.storageKey);
+        textoPlano = await this.extractText(buffer, doc.mimeType);
+
+        if (!textoPlano || textoPlano.trim().length < 50) {
+          const msg = doc.mimeType === 'application/pdf'
+            ? 'El PDF no contiene texto seleccionable; se requiere OCR'
+            : 'No se pudo extraer texto del documento';
           await this.prisma.jobIngesta.update({
             where: { id: job.id },
-            data: {
-              estado: 'FALLIDO',
-              errorMensaje: 'Extracción de PDF/DOCX requiere el worker. Suba un archivo TXT o espere al worker.',
-              finishedAt: new Date(),
-            },
+            data: { estado: 'FALLIDO', errorMensaje: msg, finishedAt: new Date() },
           });
           await this.prisma.normaFuenteDocumento.update({
             where: { id: documentoId },
-            data: { estado: 'ERROR', errorMensaje: 'Extracción de texto no disponible sin worker' },
+            data: { estado: 'ERROR', errorMensaje: msg },
           });
           return job;
         }
@@ -107,10 +106,39 @@ export class ExtractionService {
 
       // Step 4: Fidelity verification
       // Step 5: Persist articles
-      // Clear any existing articles from previous extraction
-      await this.prisma.articuloExtraido.deleteMany({
+      // Protect re-extraction: check for reviewed/approved articles
+      const existingArticles = await this.prisma.articuloExtraido.findMany({
         where: { documentoId },
+        select: { id: true, estado: true, revisadoPorId: true },
       });
+      const reviewedCount = existingArticles.filter(
+        (a) => a.revisadoPorId || a.estado === 'APROBADO',
+      ).length;
+
+      if (reviewedCount > 0 && !forzar) {
+        throw new ConflictException(
+          `Hay ${reviewedCount} artículos ya revisados/aprobados. ` +
+          `Envíe { "forzar": true } para descartarlos y re-extraer.`,
+        );
+      }
+
+      // Clear existing articles (within the same operation)
+      if (existingArticles.length > 0) {
+        await this.prisma.articuloExtraido.deleteMany({
+          where: { documentoId },
+        });
+        if (reviewedCount > 0) {
+          await this.audit.registrar({
+            tenantId,
+            actorType: 'HUMANO',
+            actorId: userId,
+            accion: 'CORPUS_REEXTRACCION_FORZADA',
+            entidad: 'NormaFuenteDocumento',
+            entidadId: documentoId,
+            despues: { articulosDescartados: reviewedCount },
+          });
+        }
+      }
 
       let itemsOk = 0;
       let itemsError = 0;
@@ -513,11 +541,40 @@ export class ExtractionService {
       descartados: doc.articulos.length - aprobados.length,
     };
   }
+
+  /**
+   * Extract plain text from a file buffer based on MIME type.
+   * §B.2: PDF → pdf-parse, DOCX → mammoth, TXT → UTF-8 decode.
+   */
+  private async extractText(buffer: Buffer, mimeType: string): Promise<string> {
+    if (mimeType === 'text/plain') {
+      // Strip BOM if present
+      return buffer.toString('utf-8').replace(/^\uFEFF/, '');
+    }
+
+    if (mimeType === 'application/pdf') {
+      const pdfModule = await import('pdf-parse');
+      const pdfParse = (pdfModule as any).default ?? pdfModule;
+      const result = await pdfParse(buffer);
+      return result.text ?? '';
+    }
+
+    if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value ?? '';
+    }
+
+    return '';
+  }
 }
 
 function buildCodigo(fuente: string, identificador: string): string {
   // "Art. 7" → "LOPDP-ART-7"
   // "§6.1.2" → "ISO27001-6-1-2"
+  // Normalize fuente: ISO_27001 → ISO27001 (match seed convention)
+  const normalizedFuente = fuente.replace(/_/g, '');
+
   const clean = identificador
     .replace(/^Art(?:ículo|\.)\s*/i, 'ART-')
     .replace(/^§\s*/, '')
@@ -526,5 +583,5 @@ function buildCodigo(fuente: string, identificador: string): string {
     .replace(/\s+/g, '-')
     .toUpperCase();
 
-  return `${fuente}-${clean}`;
+  return `${normalizedFuente}-${clean}`;
 }
