@@ -253,6 +253,30 @@ enum CasoCotizacion {
   B
 }
 
+enum EstadoDocumentoFuente {
+  CARGADO
+  EXTRAYENDO
+  EXTRAIDO
+  EN_REVISION
+  PUBLICADO
+  RECHAZADO
+  ERROR
+}
+
+enum EstadoArticuloExtraido {
+  PROPUESTO
+  EDITADO
+  APROBADO
+  DESCARTADO
+}
+
+enum EstadoJobIngesta {
+  PENDIENTE
+  EJECUTANDO
+  COMPLETADO
+  FALLIDO
+}
+
 // ════════════════════════════════════════════════════════════
 // 2. NÚCLEO: tenant, usuarios, empresa cliente
 // ════════════════════════════════════════════════════════════
@@ -401,6 +425,10 @@ model Norma {
   hashSha256          String                       @map("hash_sha256")
   modulosRelacionados String[]                     @map("modulos_relacionados")
   embedding           Unsupported("vector(1024)")?
+  textoVerificado     Boolean                      @default(false) @map("texto_verificado")
+  fuenteDocumentoId   String?                      @map("fuente_documento_id") @db.Uuid
+  indexadoAt          DateTime?                    @map("indexado_at")
+  modeloEmbedding     String?                      @map("modelo_embedding")
   createdAt           DateTime                     @default(now()) @map("created_at")
 
   controlesNormativos ControlNormativo[]
@@ -410,6 +438,8 @@ model Norma {
   normaVistas         NormaVista[]
   controles           Control[]
   corpusChunks        CorpusChunk[]
+  fuenteDocumento     NormaFuenteDocumento? @relation(fields: [fuenteDocumentoId], references: [id])
+  versiones           NormaVersion[]
 
   @@unique([fuente, identificador])
   @@map("normas")
@@ -1491,9 +1521,117 @@ model CorpusChunk {
   metadata           Json?
   embedding          Unsupported("vector(1024)")?
   hashSha256         String                       @map("hash_sha256")
+  orden              Int                          @default(0)
+  encabezado         String?                      @db.Text
+  tokens             Int?
+  modeloEmbedding    String?                      @map("modelo_embedding")
+  dimensiones        Int?
+  indexadoAt          DateTime?                   @map("indexado_at")
 
   norma            Norma?            @relation(fields: [normaId], references: [id])
   controlNormativo ControlNormativo? @relation(fields: [controlNormativoId], references: [id])
 
+  @@index([normaId])
+  @@unique([normaId, orden])
   @@map("corpus_chunks")
+}
+
+// ════════════════════════════════════════════════════════════
+// 12. CORPUS ADMIN — ingesta, extracción, versionado (RN-004)
+// ════════════════════════════════════════════════════════════
+
+model NormaFuenteDocumento {
+  id               String                @id @default(uuid()) @db.Uuid
+  nombreArchivo    String                @map("nombre_archivo")
+  mimeType         String                @map("mime_type")
+  tamanoBytes      Int                   @map("tamano_bytes")
+  storageKey       String                @map("storage_key")
+  hashSha256       String                @map("hash_sha256")
+  paginas          Int?
+  fuente           FuenteNorma
+  tipo             TipoNorma
+  organismoEmisor  String                @map("organismo_emisor")
+  fechaPublicacion DateTime?             @map("fecha_publicacion")
+  registroOficial  String?               @map("registro_oficial")
+  estado           EstadoDocumentoFuente @default(CARGADO)
+  textoPlano       String?               @db.Text @map("texto_plano")
+  errorMensaje     String?               @db.Text @map("error_mensaje")
+  subidoPorId      String                @map("subido_por_id") @db.Uuid
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+
+  articulos ArticuloExtraido[]
+  normas    Norma[]
+  jobs      JobIngesta[]
+
+  @@map("norma_fuente_documentos")
+}
+
+model ArticuloExtraido {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  documentoId         String                 @map("documento_id") @db.Uuid
+  orden               Int
+  codigoPropuesto     String                 @map("codigo_propuesto")
+  identificador       String
+  titulo              String
+  categoria           String?
+  textoNormativo      String                 @db.Text @map("texto_normativo")
+  resumenEjecutivo    String?                @db.Text @map("resumen_ejecutivo")
+  fasePHVA            FasePHVA?              @map("fase_phva")
+  modulosRelacionados String[]               @map("modulos_relacionados")
+  controlesSugeridos  Json?                  @map("controles_sugeridos")
+  paginaInicio        Int?                   @map("pagina_inicio")
+  offsetInicio        Int?                   @map("offset_inicio")
+  offsetFin           Int?                   @map("offset_fin")
+  metodoExtraccion    String                 @map("metodo_extraccion")
+  confianza           Float?
+  fidelidadVerificada Boolean                @default(false) @map("fidelidad_verificada")
+  camposGeneradosIA   String[]               @map("campos_generados_ia")
+  estado              EstadoArticuloExtraido @default(PROPUESTO)
+  revisadoPorId       String?                @map("revisado_por_id") @db.Uuid
+  revisadoAt          DateTime?              @map("revisado_at")
+  notaRevision        String?                @db.Text @map("nota_revision")
+
+  documento NormaFuenteDocumento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@unique([documentoId, orden])
+  @@map("articulos_extraidos")
+}
+
+model NormaVersion {
+  id               String      @id @default(uuid()) @db.Uuid
+  normaId          String      @map("norma_id") @db.Uuid
+  version          String
+  textoNormativo   String      @db.Text @map("texto_normativo")
+  resumenEjecutivo String      @db.Text @map("resumen_ejecutivo")
+  estado           EstadoNorma
+  hashSha256       String      @map("hash_sha256")
+  motivoCambio     String?     @db.Text @map("motivo_cambio")
+  creadoPorId      String      @map("creado_por_id") @db.Uuid
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  norma Norma @relation(fields: [normaId], references: [id])
+
+  @@unique([normaId, version])
+  @@map("norma_versiones")
+}
+
+model JobIngesta {
+  id            String           @id @default(uuid()) @db.Uuid
+  documentoId   String?          @map("documento_id") @db.Uuid
+  tipo          String
+  estado        EstadoJobIngesta @default(PENDIENTE)
+  progreso      Int              @default(0)
+  totalItems    Int?             @map("total_items")
+  itemsOk       Int              @default(0) @map("items_ok")
+  itemsError    Int              @default(0) @map("items_error")
+  errorMensaje  String?          @db.Text @map("error_mensaje")
+  iniciadoPorId String           @map("iniciado_por_id") @db.Uuid
+  startedAt     DateTime?        @map("started_at")
+  finishedAt    DateTime?        @map("finished_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  documento NormaFuenteDocumento? @relation(fields: [documentoId], references: [id])
+
+  @@map("jobs_ingesta")
 }

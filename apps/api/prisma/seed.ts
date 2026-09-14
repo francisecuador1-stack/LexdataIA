@@ -107,6 +107,8 @@ async function main() {
   for (const n of allNormas) {
     const lockEntry = lockMap.get(n.codigo)!;
 
+    const isPlaceholder = n.texto_normativo.includes('TODO: verificar con LEGAL_ADMIN');
+
     const created = await prisma.norma.create({
       data: {
         codigo: n.codigo,
@@ -123,6 +125,7 @@ async function main() {
         fasePHVA: n.fase_phva as any,
         hashSha256: lockEntry.hash,
         modulosRelacionados: n.modulos_relacionados ?? [],
+        textoVerificado: !isPlaceholder,
       },
     });
     normaIds[n.codigo] = created.id;
