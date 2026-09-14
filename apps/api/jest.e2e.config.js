@@ -17,6 +17,7 @@ module.exports = {
   moduleNameMapper: {
     '^@lexdata/contracts(.*)$': join(__dirname, '../../packages/contracts/src$1'),
     '^@lexdata/legal-corpus(.*)$': join(__dirname, '../../packages/legal-corpus/src$1'),
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   testEnvironment: 'node',
 };
