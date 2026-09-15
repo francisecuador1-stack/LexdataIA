@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/api/client';
 import { useActiveClient } from '@/stores/useActiveClient';
 
-// Helper to create phase-scoped hooks
+// Helper to create phase-scoped hooks — passes clienteId for multi-client scoping
 function useFaseQuery<T>(fase: string, endpoint: string, key: string) {
   const clienteId = useActiveClient((s) => s.clienteId);
   return useQuery({
     queryKey: [fase, key, clienteId],
-    queryFn: () => get<T>(`/${fase}/${endpoint}`),
+    queryFn: () => get<T>(`/${fase}/${endpoint}${clienteId ? `?clienteId=${clienteId}` : ''}`),
     enabled: !!clienteId,
   });
 }
