@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Req } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, Query } from '@nestjs/common';
 import { Fase2Service } from './fase2.service';
 import { Roles } from '../common/decorators/roles.decorator';
 
@@ -8,7 +8,9 @@ export class Fase2Controller {
 
   // ── Tratamientos (RAT) ──
   @Get('tratamientos')
-  listTratamientos(@Req() req: any) { return this.service.listTratamientos(req.user.tenantId); }
+  listTratamientos(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.listTratamientos(req.user.tenantId, clienteId);
+  }
 
   @Post('tratamientos')
   createTratamiento(@Req() req: any, @Body() body: any) { return this.service.createTratamiento(req.user.tenantId, body); }
@@ -21,7 +23,9 @@ export class Fase2Controller {
 
   // ── Activos ──
   @Get('activos')
-  listActivos(@Req() req: any) { return this.service.listActivos(req.user.tenantId); }
+  listActivos(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.listActivos(req.user.tenantId, clienteId);
+  }
 
   @Post('activos')
   createActivo(@Req() req: any, @Body() body: any) { return this.service.createActivo(req.user.tenantId, body); }
@@ -32,7 +36,9 @@ export class Fase2Controller {
 
   // ── Riesgos ──
   @Get('riesgos')
-  listRiesgos(@Req() req: any) { return this.service.listRiesgos(req.user.tenantId); }
+  listRiesgos(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.listRiesgos(req.user.tenantId, clienteId);
+  }
 
   @Post('riesgos')
   createRiesgo(@Req() req: any, @Body() body: any) { return this.service.createRiesgo(req.user.tenantId, body); }
@@ -45,17 +51,23 @@ export class Fase2Controller {
   indicadorRiesgo(@Req() req: any) { return this.service.indicadorRiesgo(req.user.tenantId); }
 
   @Get('mapa-calor')
-  mapaCalor(@Req() req: any) { return this.service.mapaCalor(req.user.tenantId); }
+  mapaCalor(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.mapaCalor(req.user.tenantId, clienteId);
+  }
 
   @Get('matriz-consolidada')
-  matrizConsolidada(@Req() req: any) { return this.service.matrizConsolidada(req.user.tenantId); }
+  matrizConsolidada(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.matrizConsolidada(req.user.tenantId, clienteId);
+  }
 
   @Get('brecha-controles')
   brechaControles(@Req() req: any) { return this.service.brechaControles(req.user.tenantId); }
 
   // ── EIPD ──
   @Get('eipd')
-  listEipd(@Req() req: any) { return this.service.listEipd(req.user.tenantId); }
+  listEipd(@Req() req: any, @Query('clienteId') clienteId?: string) {
+    return this.service.listEipd(req.user.tenantId, clienteId);
+  }
 
   @Post('eipd')
   createEipd(@Req() req: any, @Body() body: any) { return this.service.createEipd(req.user.tenantId, body); }

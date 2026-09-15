@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { calcularScoreRiesgo, decidirEipd, calcularBrechaControles } from '@lexdata/contracts';
 
 @Injectable()
@@ -8,11 +9,21 @@ export class Fase2Service {
     private readonly prisma: PrismaService,
   ) {}
 
+  /**
+   * Build the where clause for multi-client scoping.
+   * Filters by tenantId always, and by clienteId if provided.
+   */
+  private scopeWhere(tenantId: string, clienteId?: string): { tenantId: string; clienteId?: string } {
+    const where: any = { tenantId };
+    if (clienteId) where.clienteId = clienteId;
+    return where;
+  }
+
   // ── Tratamientos (RAT) ──
 
-  async listTratamientos(tenantId: string) {
+  async listTratamientos(tenantId: string, clienteId?: string) {
     const data = await this.prisma.tratamiento.findMany({
-      where: { tenantId },
+      where: this.scopeWhere(tenantId, clienteId),
       orderBy: { codigoRat: 'asc' },
     });
     const validados = data.filter(t => t.estado === 'VALIDADO').length;
@@ -23,7 +34,7 @@ export class Fase2Service {
   async createTratamiento(tenantId: string, data: {
     codigoRat: string; nombre: string; finalidad: string;
     baseLegal?: string; area?: string; datosSensibles?: boolean;
-    categorias?: string[]; retencion?: string;
+    categorias?: string[]; retencion?: string; clienteId?: string;
   }) {
     return this.prisma.tratamiento.create({
       data: { tenantId, ...data, estado: 'PENDIENTE' },
@@ -50,15 +61,18 @@ export class Fase2Service {
 
   // ── Activos ──
 
-  async listActivos(tenantId: string) {
-    const data = await this.prisma.activo.findMany({ where: { tenantId }, orderBy: { nombre: 'asc' } });
+  async listActivos(tenantId: string, clienteId?: string) {
+    const data = await this.prisma.activo.findMany({
+      where: this.scopeWhere(tenantId, clienteId),
+      orderBy: { nombre: 'asc' },
+    });
     return { data, total: data.length };
   }
 
   async createActivo(tenantId: string, data: {
     nombre: string; tipo: string; criticidad: 'BAJA' | 'MEDIA' | 'ALTA';
     responsable: string; ubicacion: string; sistemas: string[];
-    contienePersonales?: boolean;
+    contienePersonales?: boolean; clienteId?: string;
   }) {
     return this.prisma.activo.create({ data: { tenantId, ...data } });
   }
@@ -74,9 +88,13 @@ export class Fase2Service {
 
   // ── Riesgos ──
 
-  async listRiesgos(tenantId: string) {
+  async listRiesgos(tenantId: string, clienteId?: string) {
+    const where: Prisma.RiesgoWhereInput = { tenantId };
+    if (clienteId) {
+      where.tratamiento = { clienteId };
+    }
     const data = await this.prisma.riesgo.findMany({
-      where: { tenantId },
+      where,
       include: { tratamiento: true, activo: true, amenaza: true },
       orderBy: { score: 'desc' },
     });
@@ -105,12 +123,6 @@ export class Fase2Service {
       },
     });
 
-    // RN-201: if zona roja, create notification and mark EIPD obligatoria
-    if (requiereEipd) {
-      // TODO: emit event for notification to DPO
-      // TODO: auto-create EIPD for the tratamiento if not exists
-    }
-
     return riesgo;
   }
 
@@ -135,9 +147,12 @@ export class Fase2Service {
 
   // ── Mapa de calor 5×5 ──
 
-  async mapaCalor(tenantId: string) {
+  async mapaCalor(tenantId: string, clienteId?: string) {
+    const where: Prisma.RiesgoWhereInput = { tenantId };
+    if (clienteId) where.tratamiento = { clienteId };
+
     const riesgos = await this.prisma.riesgo.findMany({
-      where: { tenantId },
+      where,
       include: { tratamiento: true, activo: true },
     });
 
@@ -158,9 +173,12 @@ export class Fase2Service {
 
   // ── Matriz consolidada ──
 
-  async matrizConsolidada(tenantId: string) {
+  async matrizConsolidada(tenantId: string, clienteId?: string) {
+    const where: Prisma.RiesgoWhereInput = { tenantId };
+    if (clienteId) where.tratamiento = { clienteId };
+
     const data = await this.prisma.riesgo.findMany({
-      where: { tenantId },
+      where,
       include: { tratamiento: true, activo: true },
       orderBy: { score: 'desc' },
     });
@@ -184,9 +202,12 @@ export class Fase2Service {
 
   // ── EIPD ──
 
-  async listEipd(tenantId: string) {
+  async listEipd(tenantId: string, clienteId?: string) {
+    const where: Prisma.EvaluacionEipdWhereInput = { tenantId };
+    if (clienteId) where.tratamiento = { clienteId };
+
     return this.prisma.evaluacionEipd.findMany({
-      where: { tenantId },
+      where,
       include: { tratamiento: true },
     });
   }

@@ -194,9 +194,11 @@ async function seedDemo() {
     const result = await prisma.tratamiento.upsert({
       where: { tenantId_codigoRat: { tenantId, codigoRat: t.codigoRat } },
       update: {},
+      update: { clienteId: cliente.id },
       create: {
         id,
         tenantId,
+        clienteId: cliente.id,
         codigoRat: t.codigoRat,
         nombre: t.nombre,
         finalidad: t.finalidad,
@@ -302,6 +304,7 @@ async function seedDemo() {
         data: {
           id,
           tenantId,
+          clienteId: cliente.id,
           nombre: a.nombre,
           tipo: a.tipo,
           criticidad: a.criticidad,
@@ -311,6 +314,8 @@ async function seedDemo() {
           contienePersonales: true,
         },
       });
+    } else {
+      await prisma.activo.update({ where: { id }, data: { clienteId: cliente.id } });
     }
     activos[a.key] = existing;
   }
