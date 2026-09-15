@@ -129,25 +129,25 @@ export function ClientPortal() {
                 <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                   <div className="rounded-lg bg-slate-50 p-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">Razón Social</span>
-                    <div className="mt-1 text-sm font-medium text-slate-800">{res?.razonSocial ?? '—'}</div>
+                    <div className="mt-1 text-sm font-medium text-slate-800">{(res as any)?.cliente?.razonSocial ?? 'No registrado'}</div>
                   </div>
                   <div className="rounded-lg bg-slate-50 p-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">RUC</span>
-                    <div className="mt-1 text-sm font-medium text-slate-800">{res?.ruc ?? '—'}</div>
+                    <div className="mt-1 text-sm font-medium text-slate-800">{(res as any)?.cliente?.ruc ?? 'No registrado'}</div>
                   </div>
                   <div className="rounded-lg bg-slate-50 p-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">Sector</span>
-                    <div className="mt-1 text-sm font-medium text-slate-800">{res?.sector ?? '—'}</div>
+                    <div className="mt-1 text-sm font-medium text-slate-800">{(res as any)?.cliente?.sector ?? 'No registrado'}</div>
                   </div>
                   <div className="rounded-lg bg-slate-50 p-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">Ciudad</span>
-                    <div className="mt-1 text-sm font-medium text-slate-800">{res?.ciudad ?? '—'}</div>
+                    <div className="mt-1 text-sm font-medium text-slate-800">{(res as any)?.cliente?.ciudad ?? 'No registrado'}</div>
                   </div>
                   <div className="rounded-lg bg-slate-50 p-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">Nivel de Riesgo</span>
                     <div className="mt-1">
-                      <Badge variant={res?.nivelRiesgo === 'ALTO' ? 'alto' : res?.nivelRiesgo === 'MEDIO' ? 'medio' : 'bajo'}>
-                        {res?.nivelRiesgo ?? '—'}
+                      <Badge variant={(res as any)?.cliente?.nivelRiesgo === 'ALTO' || (res as any)?.cliente?.nivelRiesgo === 'CRITICO' ? 'alto' : (res as any)?.cliente?.nivelRiesgo === 'MEDIO' ? 'medio' : 'bajo'}>
+                        {(res as any)?.cliente?.nivelRiesgo ?? 'No registrado'}
                       </Badge>
                     </div>
                   </div>

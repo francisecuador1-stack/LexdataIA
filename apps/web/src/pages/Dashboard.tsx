@@ -30,7 +30,7 @@ export function Dashboard() {
       <ModuleHeader
         ciclo="ANÁLISIS"
         title="Dashboard de Cumplimiento PHVA"
-        subtitle="Sistema SGPDP · LOPDP Ecuador · Actualización jul 2026"
+        subtitle={`Sistema SGPDP · LOPDP Ecuador · Actualización ${new Date().toLocaleDateString('es-EC', { month: 'short', year: 'numeric' })}`}
         badges={[{ label: 'Atención requerida', variant: 'amber' }]}
       />
 
@@ -56,8 +56,10 @@ export function Dashboard() {
               />
               <KpiCard
                 label="CUMPLIMIENTO DOC."
-                value={isLoading ? '—' : '62%'}
-                sub="documentos aprobados"
+                value={isLoading ? '—' : kpis?.controlesTotales > 0
+                  ? `${Math.round((kpis.controlesImplementados / kpis.controlesTotales) * 100)}%`
+                  : '0%'}
+                sub={`${kpis?.controlesImplementados ?? 0} de ${kpis?.controlesTotales ?? 0} controles`}
                 icon={FileCheck}
               />
               <KpiCard
