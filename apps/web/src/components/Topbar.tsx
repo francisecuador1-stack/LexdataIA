@@ -5,9 +5,9 @@ const TICKER_MESSAGES = [
   'FASE 6 · Procesando hallazgos de auditoría para ciclo PHVA de mejora continua',
   'FASE 2 · Analizando bases legales de tratamientos en el RAT actualizado',
   'FASE 4 · Revisando cláusulas DPA con encargados de tratamiento externos',
-  'FASE 6 · Monitoreando registro de incidentes · Protocolo 72h SPDP activo',
-  'FASE 5 · Verificando plazos ARCO-PS · 15 días hábiles (Acceso, Rectificación, Eliminación)',
-  'FASE 2 · Revisando EIPD — verificando criterios de alto riesgo LOPDP Art. 39',
+  'FASE 6 · Monitoreando registro de incidentes · Notificación a SPDP en 5 días (Art. 43) · Al titular en 3 días (Art. 46)',
+  'FASE 5 · Verificando plazos ARCO-PS · 15 días (Arts. 13-16 LOPDP)',
+  'FASE 2 · Revisando EIPD — verificando criterios de alto riesgo LOPDP Art. 42',
 ];
 
 interface TopbarProps {

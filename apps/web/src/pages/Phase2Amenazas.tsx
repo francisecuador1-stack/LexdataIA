@@ -86,7 +86,7 @@ export function Phase2Amenazas() {
         {tab === 'procesos' && (
           <div>
             <NormativeBanner tone="info">
-              Art. 37 LOPDP · Registro de Actividades de Tratamiento — Todo tratamiento de datos personales debe documentarse
+              Art. 51 LOPDP · Registro Nacional de Protección de Datos — Todo tratamiento de datos personales debe documentarse
               y registrarse conforme al principio de responsabilidad proactiva.
             </NormativeBanner>
             {loadingTrat ? (
