@@ -33,6 +33,7 @@ export function Phase2Amenazas() {
   const tratList = (tratamientos as any)?.data as any[] | undefined;
   const activosList = (activos as any)?.data as any[] | undefined;
   const riesgosList = (riesgos as any)?.data as any[] | undefined;
+  const eipdList = eipd as any[] | undefined;
 
   return (
     <div>
@@ -194,10 +195,85 @@ export function Phase2Amenazas() {
           </div>
         )}
 
-        {['categorias', 'riesgos', 'eipd', 'matriz', 'brechas', 'reportes'].includes(tab) && !['mapa'].includes(tab) && (
+        {tab === 'riesgos' && (
+          <div>
+            <NormativeBanner tone="warning">
+              Art. 37 LOPDP · Medidas de seguridad — Los riesgos identificados deben ser tratados con controles
+              proporcionales. Los riesgos críticos y altos requieren atención prioritaria.
+            </NormativeBanner>
+            {riesgosList && (riesgosList as any[]).length > 0 ? (
+              <DataTable
+                columns={[
+                  { key: 'tratamiento', header: 'Tratamiento', render: (r: any) => (
+                    <span className="text-xs font-medium text-slate-700">{r.tratamiento?.nombre ?? '—'}</span>
+                  )},
+                  { key: 'activo', header: 'Activo', render: (r: any) => (
+                    <span className="text-xs text-slate-600">{r.activo?.nombre ?? '—'}</span>
+                  )},
+                  { key: 'vulnerabilidadTexto', header: 'Vulnerabilidad', render: (r: any) => (
+                    <span className="text-xs text-slate-600 line-clamp-2">{r.vulnerabilidadTexto ?? '—'}</span>
+                  )},
+                  { key: 'impacto', header: 'I', render: (r: any) => <span className="text-xs font-mono">{r.impacto}</span> },
+                  { key: 'probabilidad', header: 'P', render: (r: any) => <span className="text-xs font-mono">{r.probabilidad}</span> },
+                  { key: 'score', header: 'Score', render: (r: any) => <span className="text-xs font-bold">{r.score}</span> },
+                  { key: 'nivel', header: 'Nivel', render: (r: any) => (
+                    <Badge variant={r.nivel === 'CRITICO' ? 'red' : r.nivel === 'ALTO' ? 'amber' : r.nivel === 'MEDIO' ? 'blue' : 'green'}>
+                      {r.nivel}
+                    </Badge>
+                  )},
+                  { key: 'estado', header: 'Estado', render: (r: any) => (
+                    <Badge variant={r.estado === 'MITIGADO' ? 'verificado' : 'pendiente'}>{r.estado}</Badge>
+                  )},
+                ]}
+                data={riesgosList as any[]}
+                emptyMessage="No hay riesgos registrados"
+              />
+            ) : (
+              <EmptyState titulo="Sin riesgos registrados" descripcion="Los riesgos se generan al evaluar tratamientos y activos." />
+            )}
+          </div>
+        )}
+
+        {tab === 'eipd' && (
+          <div>
+            <NormativeBanner tone="info">
+              Art. 42 LOPDP · Evaluación de Impacto — Obligatoria cuando el tratamiento implique datos sensibles
+              a gran escala, decisiones automatizadas con elaboración de perfiles, o vigilancia sistemática.
+            </NormativeBanner>
+            {eipdList && (eipdList as any[]).length > 0 ? (
+              <DataTable
+                columns={[
+                  { key: 'tratamiento', header: 'Tratamiento', render: (r: any) => (
+                    <span className="text-xs font-medium text-slate-700">{r.tratamiento?.nombre ?? '—'}</span>
+                  )},
+                  { key: 'decision', header: 'Decisión', render: (r: any) => (
+                    <Badge variant={r.decision === 'OBLIGATORIO' ? 'red' : 'green'}>{r.decision}</Badge>
+                  )},
+                  { key: 'puntajeMtge', header: 'Puntaje MTGE', render: (r: any) => (
+                    <span className="text-xs font-mono">{r.puntajeMtge ?? '—'}</span>
+                  )},
+                  { key: 'estado', header: 'Estado', render: (r: any) => (
+                    <Badge variant={r.estado === 'Completada' ? 'verificado' : r.estado === 'Pendiente' ? 'pendiente' : 'blue'}>
+                      {r.estado}
+                    </Badge>
+                  )},
+                  { key: 'granEscala', header: 'Gran escala', render: (r: any) => r.granEscala ? 'Sí' : 'No' },
+                  { key: 'sensibles', header: 'Sensibles', render: (r: any) => r.sensibles ? 'Sí' : 'No' },
+                  { key: 'menores', header: 'Menores', render: (r: any) => r.menores ? 'Sí' : 'No' },
+                ]}
+                data={eipdList as any[]}
+                emptyMessage="No hay evaluaciones de impacto registradas"
+              />
+            ) : (
+              <EmptyState titulo="Sin EIPD registradas" descripcion="Las EIPD se generan al identificar tratamientos de alto riesgo." />
+            )}
+          </div>
+        )}
+
+        {['categorias', 'matriz', 'brechas', 'reportes'].includes(tab) && (
           <div className="rounded-xl border border-slate-200 bg-white p-6">
             <p className="text-sm text-slate-500">
-              Vista de {TABS.find(t => t.key === tab)?.label} — Contenido detallado del módulo F2 · Amenazas y Vulnerabilidades.
+              Vista de {TABS.find(t => t.key === tab)?.label} — En implementación.
             </p>
           </div>
         )}
