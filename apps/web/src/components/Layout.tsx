@@ -3,10 +3,13 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { AgentChat } from './AgentChat';
+import { useClientes } from '@/hooks/useClientes';
 
 export function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
+  // Load clientes on mount — populates the "Empresa activa" selector in Sidebar
+  useClientes();
 
   return (
     <div className="flex h-screen overflow-hidden">

@@ -162,8 +162,8 @@ export function Phase6Auditoria() {
         {tab === 'incidentes' && (
           <div>
             <NormativeBanner tone="warning">
-              Art. 50 LOPDP · Notificación de vulneraciones — Las vulneraciones de seguridad deben notificarse
-              a la Superintendencia de Protección de Datos en un plazo de 72 horas.
+              Art. 43 LOPDP · Notificación de vulneraciones — Las vulneraciones de seguridad deben notificarse
+              a la Superintendencia de Protección de Datos en el término de 5 días, y al titular en 3 días (Art. 46).
             </NormativeBanner>
             <DataTable
               columns={[

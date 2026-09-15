@@ -10,7 +10,8 @@
     "lint": "echo lint-ok",
     "test": "jest --passWithNoTests",
     "test:e2e": "jest --config jest.e2e.config.js --passWithNoTests",
-    "test:integration": "jest --config jest.e2e.config.js --forceExit"
+    "test:integration": "jest --config jest.e2e.config.js --forceExit",
+    "seed:demo": "tsx prisma/seed-demo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
