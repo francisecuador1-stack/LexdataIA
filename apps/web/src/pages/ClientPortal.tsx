@@ -7,7 +7,7 @@ import { NormativeBanner } from '@/components/ui/NormativeBanner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useClienteResumen, useDerivacionDocumental } from '@/hooks/useClientes';
 import { useMadurez } from '@/hooks/useFases';
-import { ClipboardCheck, Building2, FileText, MessageSquare, TrendingUp } from 'lucide-react';
+import { ClipboardCheck, Building2, FileText, MessageSquare, TrendingUp, Download, Eye, Trash2, XCircle } from 'lucide-react';
 
 const TABS = [
   { key: 'diagnostico', label: 'Diagnóstico PIMS' },
@@ -162,34 +162,7 @@ export function ClientPortal() {
         )}
 
         {tab === 'documentos' && (
-          <div>
-            <NormativeBanner tone="legal">
-              Derivación documental — Documentos generados por el sistema SGPDP para su organización.
-              Cada documento tiene trazabilidad completa y hash de integridad.
-            </NormativeBanner>
-            {docList && docList.length > 0 ? (
-              <div className="space-y-2">
-                {docList.map((doc: any, i: number) => (
-                  <div key={doc.id ?? i} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-slate-400" />
-                      <div>
-                        <div className="text-sm font-medium text-slate-800">{doc.titulo ?? doc.nombre}</div>
-                        <div className="text-[10px] text-slate-500">{doc.tipo} · {doc.fase}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={doc.estado === 'APROBADO' ? 'verificado' : doc.estado === 'BORRADOR' ? 'pendiente' : 'slate'}>
-                        {doc.estado}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState titulo="Sin documentos disponibles" descripcion="Los documentos se generarán conforme avance el SGPDP." icon={FileText} />
-            )}
-          </div>
+          <DocumentosTab docList={docList} />
         )}
 
         {tab === 'asistente' && (
@@ -218,6 +191,129 @@ export function ClientPortal() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Documents Tab with Actions (N1) ───────────────────
+
+function DocumentosTab({ docList }: { docList: any[] | undefined }) {
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteMotivo, setDeleteMotivo] = useState('');
+
+  const handleDelete = () => {
+    if (!deleteMotivo.trim()) return;
+    // TODO: call DELETE /documentos/:id with motivo when backend is implemented
+    // For now, show confirmation
+    alert(`Documento "${deleteTarget?.titulo}" marcado para eliminación.\nMotivo: ${deleteMotivo}\n\n(Pendiente: endpoint backend de soft delete)`);
+    setDeleteTarget(null);
+    setDeleteMotivo('');
+  };
+
+  return (
+    <div>
+      <NormativeBanner tone="legal">
+        Derivación documental — Documentos generados por el sistema SGPDP para su organización.
+        La trazabilidad y el hash de integridad se registran al generar cada documento.
+      </NormativeBanner>
+      {docList && docList.length > 0 ? (
+        <div className="space-y-2">
+          {docList.map((doc: any, i: number) => (
+            <div key={doc.id ?? i} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-slate-400" />
+                <div>
+                  <div className="text-sm font-medium text-slate-800">{doc.titulo ?? doc.nombre}</div>
+                  <div className="text-[10px] text-slate-500">{doc.tipo} · {doc.baseNormativa}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* State-conditional actions (N1) */}
+                {doc.estado === 'PENDIENTE' && (
+                  <button className="rounded bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 hover:bg-blue-100">
+                    Generar
+                  </button>
+                )}
+                {doc.estado === 'BORRADOR' && (
+                  <>
+                    <button className="rounded bg-slate-50 p-1.5 text-slate-600 hover:bg-slate-100" title="Ver">
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                    <button className="rounded bg-slate-50 p-1.5 text-slate-600 hover:bg-slate-100" title="Descargar">
+                      <Download className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(doc)}
+                      className="rounded bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
+                      title="Eliminar borrador"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+                {(doc.estado === 'APROBADO' || doc.estado === 'FIRMADO') && (
+                  <>
+                    <button className="rounded bg-slate-50 p-1.5 text-slate-600 hover:bg-slate-100" title="Ver">
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                    <button className="rounded bg-slate-50 p-1.5 text-slate-600 hover:bg-slate-100" title="Descargar">
+                      <Download className="h-3.5 w-3.5" />
+                    </button>
+                    <button className="rounded bg-amber-50 p-1.5 text-amber-600 hover:bg-amber-100" title="Anular (acción DPO)">
+                      <XCircle className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+                <Badge variant={doc.estado === 'APROBADO' ? 'verificado' : doc.estado === 'BORRADOR' ? 'pendiente' : 'slate'}>
+                  {doc.estado}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState titulo="Sin documentos disponibles" descripcion="Los documentos se generarán conforme avance el SGPDP." icon={FileText} />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
+            <h3 className="mb-2 text-sm font-bold text-slate-800">Eliminar documento</h3>
+            <p className="mb-1 text-xs text-slate-600">
+              ¿Está seguro de eliminar el borrador <strong>"{deleteTarget.titulo}"</strong>?
+            </p>
+            <p className="mb-4 text-[10px] text-slate-400">
+              El documento volverá a estado Pendiente en la derivación. Esta acción queda registrada en la auditoría.
+              Nota: esto NO es una solicitud de supresión de datos personales (Art. 15 LOPDP).
+            </p>
+            <div className="mb-4">
+              <label className="mb-1 block text-xs font-medium text-slate-600">Motivo de la eliminación *</label>
+              <input
+                value={deleteMotivo}
+                onChange={(e) => setDeleteMotivo(e.target.value)}
+                placeholder="Indique el motivo…"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => { setDeleteTarget(null); setDeleteMotivo(''); }}
+                className="rounded-lg px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={!deleteMotivo.trim()}
+                className="rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                Eliminar borrador
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
