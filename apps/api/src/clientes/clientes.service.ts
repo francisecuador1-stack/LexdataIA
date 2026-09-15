@@ -43,15 +43,21 @@ export class ClientesService {
   async getResumen(tenantId: string, clienteId: string) {
     const cliente = await this.getById(tenantId, clienteId);
 
-    const [tratamientos, riesgos, hallazgos, controles, recomendaciones] = await Promise.all([
-      this.prisma.tratamiento.count({ where: { tenantId } }),
-      this.prisma.riesgo.findMany({ where: { tenantId }, select: { nivel: true } }),
+    // Scope all metrics by clienteId (via tratamiento.clienteId relation)
+    const tratamientoWhere = { tenantId, clienteId };
+    const riesgoWhere = { tenantId, tratamiento: { clienteId } };
+
+    const [tratamientos, riesgos, hallazgos, controles, recomendaciones, incidentes] = await Promise.all([
+      this.prisma.tratamiento.count({ where: tratamientoWhere }),
+      this.prisma.riesgo.findMany({ where: riesgoWhere, select: { nivel: true } }),
       this.prisma.hallazgo.count({ where: { tenantId, estado: { not: 'CERRADO' } } }),
       this.prisma.control.findMany({ where: { tenantId }, select: { estado: true } }),
       this.prisma.recomendacion.count({ where: { tenantId, estado: { not: 'CERRADA' } } }),
+      this.prisma.incidente.count({ where: { tenantId } }),
     ]);
 
     const riesgosCriticos = riesgos.filter(r => r.nivel === 'CRITICO').length;
+    const riesgosAltos = riesgos.filter(r => r.nivel === 'ALTO').length;
     const controlesImpl = controles.filter(c => c.estado === 'IMPLEMENTADO').length;
 
     return {
@@ -60,10 +66,12 @@ export class ClientesService {
         tratamientos,
         riesgosTotal: riesgos.length,
         riesgosCriticos,
+        riesgosAltos,
         hallazgosAbiertos: hallazgos,
         controlesImplementados: controlesImpl,
         controlesTotales: controles.length,
         recomendacionesActivas: recomendaciones,
+        incidentes,
       },
     };
   }
@@ -102,8 +110,8 @@ export class ClientesService {
     const docs = [
       { tipo: 'POLITICA_PRIVACIDAD', titulo: 'Política de Protección de Datos', baseNormativa: 'Art. 10 LOPDP / ISO 27701 §5.2', obligatorio: true },
       { tipo: 'AVISO_PRIVACIDAD', titulo: 'Aviso de Privacidad', baseNormativa: 'Art. 13 LOPDP', obligatorio: true },
-      { tipo: 'RAT', titulo: 'Registro de Actividades de Tratamiento', baseNormativa: 'Art. 37 LOPDP', obligatorio: true },
-      { tipo: 'PROTOCOLO_BRECHAS', titulo: 'Protocolo de Gestión de Brechas 72h', baseNormativa: 'Art. 41 LOPDP', obligatorio: true },
+      { tipo: 'RAT', titulo: 'Registro de Actividades de Tratamiento', baseNormativa: 'Art. 51 LOPDP', obligatorio: true },
+      { tipo: 'PROTOCOLO_BRECHAS', titulo: 'Protocolo de Notificación de Vulneraciones', baseNormativa: 'Arts. 43 y 46 LOPDP', obligatorio: true },
       { tipo: 'PROCEDIMIENTO_ARCO', titulo: 'Procedimiento de Atención de Derechos ARCO', baseNormativa: 'Art. 19-27 LOPDP', obligatorio: true },
       { tipo: 'ACTA_DPO', titulo: 'Acta de Designación del DPO', baseNormativa: 'Art. 42 LOPDP / Res. 2025-0028-R', obligatorio: true },
       { tipo: 'PLAN_CAPACITACION', titulo: 'Plan de Capacitación Anual', baseNormativa: 'Art. 30 LOPDP', obligatorio: true },
@@ -121,7 +129,7 @@ export class ClientesService {
     // EIPD for high-risk treatments
     const needsEipd = cliente.trataDatosSensibles || cliente.menoresEdad || cliente.decisionesAutomatizadas || cliente.perfilamiento;
     if (needsEipd) {
-      docs.push({ tipo: 'EIPD', titulo: 'Evaluación de Impacto en Protección de Datos', baseNormativa: 'Art. 39 LOPDP', obligatorio: true });
+      docs.push({ tipo: 'EIPD', titulo: 'Evaluación de Impacto en Protección de Datos', baseNormativa: 'Art. 42 LOPDP', obligatorio: true });
     }
 
     return docs;
